@@ -16,6 +16,7 @@ Upload the arduino sketch "unit.ino" in the unit folder to each unit's arduino n
 
 #### set zero position offset
 The zero position (or blank flaps position in this case) is attained by driving the stepper to the hall sensor and step a few steps forward. This offset is individual to every unit and needs to be saved to the arduino nano's EEPROM.
+
 I wrote a simple sketch to set the offset. Upload the "EEPROM_Write_Offset.ino" sketch and open the serial monitor with 9600 baudrate. It will tell you the current offset and you can enter a new offset. It should be around 100. You may need to upload the "unit.ino" sketch and see if the offset is correct. Repeat until the blank flap is showing every time the unit homes.
 
 #### set unit address
@@ -25,6 +26,26 @@ This is how my 10 units are set, 1 means switch is in the up-position:
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | 0000 | 0001 | 0010 | 0011 | 0100 | 0101 | 0110 | 0111 | 1000 | 1001 |
 
-
 #### ESP01
+To upload the sketch to the esp01 you need to install a few things to you arduino IDE.
+
+- Install the esp8266 to you IDE https://randomnerdtutorials.com/how-to-install-esp8266-board-arduino-ide/
+- Install the SPIFFS plugin to use the file system of the ESP01 https://randomnerdtutorials.com/install-esp8266-filesystem-uploader-arduino-ide/
+- Install the following libraries:
+	- ESPAsyncWebServer https://github.com/me-no-dev/ESPAsyncWebServer/archive/master.zip
+	- ESPAsyncTCP https://github.com/me-no-dev/ESPAsyncTCP/archive/master.zip
+	- Arduino_JSON from the library manager
+	- NTPClient from the library manager
+
+To upload sketches to the ESP01 you can either use an Arduino https://create.arduino.cc/projecthub/pratikdesai/how-to-program-esp8266-esp-01-module-with-arduino-uno-598166 or you can buy a dedicated programmer. I highly recommend getting a programmer as it makes uploading programs onto the ESP01 much faster.
+
+Open the sketch "ESPMaster.ino" in the ESPMaster folder, change your board to "Generic ESP8266 Module", choose the correct COM-port and click Tools->ESP8266 LittleFS Data Upload. This uploads the website onto the ESP01's file system.
+
+Modify the sketch where it says 
+`// REPLACE WITH YOUR NETWORK CREDENTIALS
+const char* ssid = "SSID";
+const char* password = "12345678901234567890";` 
+and insert your network's credentials.
+
+Now you only need to upload the sketch and you are done. Stick the ESP01 onto the first unit's PCB and control you very own split-flap display through the website.
 
