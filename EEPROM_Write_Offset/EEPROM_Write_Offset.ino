@@ -1,4 +1,4 @@
-//Code to write Calibration Offset into Arduino EEPROM
+//Code to write calibration offset into arduino EEPROM
 #include <EEPROM.h>
 
 int eeAddress = 0;   //Location we want the data to be put.

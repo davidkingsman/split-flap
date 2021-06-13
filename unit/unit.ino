@@ -1,20 +1,14 @@
-// (c) Walter Greger, internet.greger@me.com
-
-//***************************
-//code for split flap unit //
-//***************************
 // Comment or uncomment for testing or serial debug communication
-#define serial
+//#define serial
 //#define test
 
-//libs
 #include <Arduino.h>
 #include <Wire.h>
 #include <Stepper.h>
 #include <EEPROM.h>
 #include <avr/sleep.h>
 
-// Pins of I2C Adress switch
+// Pins of I2C adress switch
 #define ADRESSSW1 6
 #define ADRESSSW2 5
 #define ADRESSSW3 4
@@ -25,7 +19,7 @@
 #define STEPPERPIN2 10
 #define STEPPERPIN3 9
 #define STEPPERPIN4 8
-#define STEPS 2038 // 28BYJ-48, number of steps;
+#define STEPS 2038 // 28BYJ-48 stepper, number of steps;
 #define HALLPIN 7
 #define AMOUNTFLAPS 45
 
@@ -53,15 +47,6 @@ int stepperSpeed = 10;
 int eeAddress = 0;   //EEPROM address for calibration offset
 int calOffset;       //Offset for calibration in steps
 
-/*
-  //function decleration
-  int calibrate();
-  void rotateToLetter(int toLetter);
-  void stopMotor();
-  void startMotor();
-  void requestEvent(void);
-  int getaddress();
-*/
 int receivedNumber = 0;
 
 volatile unsigned long counter;
@@ -69,14 +54,13 @@ const unsigned long WAIT_TIME = 500;
 
 //setup
 void setup() {
-
-
-  // i2c Adress switch
+  // i2c adress switch
   pinMode(ADRESSSW1, INPUT_PULLUP);
   pinMode(ADRESSSW2, INPUT_PULLUP);
   pinMode(ADRESSSW3, INPUT_PULLUP);
   pinMode(ADRESSSW4, INPUT_PULLUP);
 
+  //hall sensor
   pinMode(HALLPIN, INPUT);
 
 #ifdef serial
@@ -86,18 +70,16 @@ void setup() {
   Serial.println("starting i2c slave");
 #endif
 
+  //I2C function assignment
   Wire.begin(getaddress()); //i2c address of this unit
   Wire.onReceive(receiveLetter); //call-function if for transfered letter via i2c
   Wire.onRequest(requestEvent); //call-funtion if master requests unit state
 
   getOffset();      //get calibration offset from EEPROM
-  calibrate(true); //going to zero point and stop motor
+  calibrate(true); //home stepper
 }
 
-
-//loop
 void loop() {
-
   //go to sleep and wait for instructions over i2c
   if (++counter >= WAIT_TIME)
   {
@@ -120,11 +102,9 @@ void loop() {
     Wire.begin(getaddress());
   }  // end of time to sleep
 
-
   //check if new letter was received through i2c
   if (displayedLetter != receivedNumber)
   {
-    //rotate to new letter
 #ifdef serial
     Serial.print("Value over serial received: ");
     Serial.print(receivedNumber);
@@ -132,6 +112,7 @@ void loop() {
     Serial.print(letters[receivedNumber]);
     Serial.println();
 #endif
+    //rotate to new letter
     rotateToLetter(receivedNumber);
   }
 
@@ -145,10 +126,9 @@ void loop() {
     delay(5000);
   }
 #endif
-  //loopend
 }
 
-//rotate to desired letter
+//rotate to letter
 void rotateToLetter(int toLetter) {
   if (lastRotation == 0 || (millis() - lastRotation > OVERHEATINGTIMEOUT * 1000)) {
     lastRotation = millis();
@@ -234,14 +214,14 @@ void receiveLetter(int numBytes) {
 
 void requestEvent() {
   Wire.write(currentlyrotating); //send unit status to master
-  /*
-    #ifdef serial
-    Serial.print("Status ");
-    Serial.print(currentlyrotating);
-    Serial.print(" sent to master");
-    Serial.println();
-    #endif
-  */
+
+#ifdef serial
+  Serial.print("Status ");
+  Serial.print(currentlyrotating);
+  Serial.print(" sent to master");
+  Serial.println();
+#endif
+
 }
 
 //returns the adress of the unit as int from 0-15
