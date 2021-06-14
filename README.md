@@ -27,9 +27,9 @@ This is how my 10 units are set, 1 means switch is in the up-position:
 | 0000 | 0001 | 0010 | 0011 | 0100 | 0101 | 0110 | 0111 | 1000 | 1001 |
 
 #### ESP01
-To upload the sketch to the esp01 you need to install a few things to you arduino IDE.
+To upload the sketch to the ESP01 you need to install a few things to your arduino IDE.
 
-- Install the esp8266 to you IDE https://randomnerdtutorials.com/how-to-install-esp8266-board-arduino-ide/
+- Install the esp8266 to your Arduino IDE https://randomnerdtutorials.com/how-to-install-esp8266-board-arduino-ide/
 - Install the SPIFFS plugin to use the file system of the ESP01 https://randomnerdtutorials.com/install-esp8266-filesystem-uploader-arduino-ide/
 - Install the following libraries:
 	- ESPAsyncWebServer https://github.com/me-no-dev/ESPAsyncWebServer/archive/master.zip
@@ -40,12 +40,15 @@ To upload the sketch to the esp01 you need to install a few things to you arduin
 To upload sketches to the ESP01 you can either use an Arduino https://create.arduino.cc/projecthub/pratikdesai/how-to-program-esp8266-esp-01-module-with-arduino-uno-598166 or you can buy a dedicated programmer. I highly recommend getting a programmer as it makes uploading programs onto the ESP01 much faster.
 
 Open the sketch "ESPMaster.ino" in the ESPMaster folder, change your board to "Generic ESP8266 Module", choose the correct COM-port and click Tools->ESP8266 LittleFS Data Upload. This uploads the website onto the ESP01's file system.
-
+##### change sketch values
 Modify the sketch where it says 
 `// REPLACE WITH YOUR NETWORK CREDENTIALS
 const char* ssid = "SSID";
-const char* password = "12345678901234567890";` 
+const char* password = "12345678901234567890";`
 and insert your network's credentials.
 
-Now you only need to upload the sketch and you are done. Stick the ESP01 onto the first unit's PCB and control you very own split-flap display through the website.
+Also change the timeoffset to your timezone: `#define TIMEOFFSET 7200` It is defined as offset in seconds from GMT. 
+
+##### final upload
+Now you only need to upload the sketch and you are done. Stick the ESP01 onto the first unit's PCB and navigate to the IP-adress the ESP01 is getting assigned from your router.
 
