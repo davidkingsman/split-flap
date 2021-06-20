@@ -7,7 +7,7 @@ The display's electronics use one esp01 as the master and up to 16 arduinos as s
 Assemble everything according to the instruction manual.
 
 ### PCB
-Gerber files are in the pcb folder. You need one per unit. Populate components according to the instruction manual.
+Gerber files are in the pcb folder. You need one per unit. Populate components according to the instruction manual on prusaprinters.
 ### Unit
 Each split-flap unit consists of an arduino nano mounted on a custom pcb. It controls a 28BYJ-48 stepper motor via a ULN2003 driver chip. The drum with the flaps is homed with a KY003 hall sensor and a magnet mounted to the drum.
 
