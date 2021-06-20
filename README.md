@@ -1,6 +1,5 @@
 # split-flap
-code for split-flap display. 
-3D-files here: https://www.prusaprinters.org/social/2440-david-kingsman/prints
+3D-files here: https://www.prusaprinters.org/prints/69464-split-flap-display
 
 ## General
 The display's electronics use one esp01 as the master and up to 16 arduinos as slaves. The esp handles the webinterface and communicates to the units via I2C. Each unit is resposible for setting the zero position of the drum on startup and displaying any letter the master send its way.
@@ -51,4 +50,3 @@ Also change the timeoffset to your timezone: `#define TIMEOFFSET 7200` It is def
 
 ##### final upload
 Now you only need to upload the sketch and you are done. Stick the ESP01 onto the first unit's PCB and navigate to the IP-adress the ESP01 is getting assigned from your router.
-
