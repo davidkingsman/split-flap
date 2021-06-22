@@ -1,6 +1,8 @@
-// Comment or uncomment for testing or serial debug communication
-//#define serial
-//#define test
+/*********
+  Split Flap Arduino Uno Unit
+*********/
+#define serial // uncomment for serial debug communication
+//#define test //uncomment for Test mode. Rotates through a few character to make sure unit is working
 
 #include <Arduino.h>
 #include <Wire.h>
@@ -23,7 +25,6 @@
 #define HALLPIN 7
 #define AMOUNTFLAPS 45
 
-bool stepperOverheated = false;
 //constants others
 #define BAUDRATE 9600
 #define ROTATIONDIRECTION -1 //-1 for reverse direction
@@ -31,8 +32,8 @@ bool stepperOverheated = false;
 unsigned long lastRotation = 0;
 
 //globals
-int displayedLetter = 0;
-int desiredLetter = 0;
+int displayedLetter = 0; //currently shown letter
+int desiredLetter = 0; //letter to be shown
 const String letters[] = {" ", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "Ä", "Ö", "Ü", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", ":", ".", "-", "?", "!"};
 Stepper stepper(STEPS, STEPPERPIN1, STEPPERPIN3, STEPPERPIN2, STEPPERPIN4); //stepper setup
 bool lastInd1 = false; //store last status of phase
@@ -40,15 +41,12 @@ bool lastInd2 = false; //store last status of phase
 bool lastInd3 = false; //store last status of phase
 bool lastInd4 = false; //store last status of phase
 float missedSteps = 0; //cummulate steps <1, to compensate via additional step when reaching >1
-int currentlyrotating = 0;
-
-int stepperSpeed = 10;
-
+int currentlyrotating = 0; // 1 = drum is currently rotating, 0 = drum is standing still
+int stepperSpeed = 10; //current speed of stepper, value only for first homing
 int eeAddress = 0;   //EEPROM address for calibration offset
-int calOffset;       //Offset for calibration in steps
-
+int calOffset;       //Offset for calibration in steps, stored in EEPROM, gets read in setup
 int receivedNumber = 0;
-
+//sleep globals
 volatile unsigned long counter;
 const unsigned long WAIT_TIME = 500;
 
@@ -66,20 +64,20 @@ void setup() {
 #ifdef serial
   //initialize serial
   Serial.begin(BAUDRATE);
-  //initialize i2c
-  Serial.println("starting i2c slave");
+  Serial.println("starting unit");
 #endif
 
   //I2C function assignment
   Wire.begin(getaddress()); //i2c address of this unit
-  Wire.onReceive(receiveLetter); //call-function if for transfered letter via i2c
+  Wire.onReceive(receiveLetter);//call-function for transfered letter via i2c
   Wire.onRequest(requestEvent); //call-funtion if master requests unit state
 
-  getOffset();      //get calibration offset from EEPROM
-  calibrate(true); //home stepper
+  getOffset();     //get calibration offset from EEPROM
+  calibrate(true); //home stepper after startup
 }
 
 void loop() {
+/*
   //go to sleep and wait for instructions over i2c
   if (++counter >= WAIT_TIME)
   {
@@ -88,9 +86,7 @@ void loop() {
     ADCSRA = 0;
     set_sleep_mode (SLEEP_MODE_PWR_DOWN);
     sleep_enable();
-    //digitalWrite (LED_BUILTIN, LOW);
     sleep_cpu ();
-    //digitalWrite (LED_BUILTIN, HIGH);
     sleep_disable();
     counter = 0;
     ADCSRA = old_ADCSRA;
@@ -101,17 +97,19 @@ void loop() {
     // turn it back on again
     Wire.begin(getaddress());
   }  // end of time to sleep
-
+*/
   //check if new letter was received through i2c
   if (displayedLetter != receivedNumber)
   {
-#ifdef serial
-    Serial.print("Value over serial received: ");
-    Serial.print(receivedNumber);
-    Serial.print(" Letter: ");
-    Serial.print(letters[receivedNumber]);
-    Serial.println();
-#endif
+    /*
+      #ifdef serial
+      Serial.print("Value over serial received: ");
+      Serial.print(receivedNumber);
+      Serial.print(" Letter: ");
+      Serial.print(letters[receivedNumber]);
+      Serial.println();
+      #endif
+    */
     //rotate to new letter
     rotateToLetter(receivedNumber);
   }
@@ -214,14 +212,14 @@ void receiveLetter(int numBytes) {
 
 void requestEvent() {
   Wire.write(currentlyrotating); //send unit status to master
-
+/*
 #ifdef serial
   Serial.print("Status ");
   Serial.print(currentlyrotating);
   Serial.print(" sent to master");
   Serial.println();
 #endif
-
+*/
 }
 
 //returns the adress of the unit as int from 0-15
