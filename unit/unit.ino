@@ -1,7 +1,8 @@
 /*********
   Split Flap Arduino Uno Unit
 *********/
-#define serial // uncomment for serial debug communication
+
+//#define serial // uncomment for serial debug communication
 //#define test //uncomment for Test mode. Rotates through a few character to make sure unit is working
 
 #include <Arduino.h>
@@ -21,8 +22,8 @@
 #define STEPPERPIN2 10
 #define STEPPERPIN3 9
 #define STEPPERPIN4 8
-#define STEPS 2038 // 28BYJ-48 stepper, number of steps;
-#define HALLPIN 7
+#define STEPS 2038 // 28BYJ-48 stepper, number of steps
+#define HALLPIN 7 //Pin of hall sensor
 #define AMOUNTFLAPS 45
 
 //constants others
@@ -46,9 +47,11 @@ int stepperSpeed = 10; //current speed of stepper, value only for first homing
 int eeAddress = 0;   //EEPROM address for calibration offset
 int calOffset;       //Offset for calibration in steps, stored in EEPROM, gets read in setup
 int receivedNumber = 0;
+int i2cAddress;
+
 //sleep globals
-volatile unsigned long counter;
-const unsigned long WAIT_TIME = 500;
+const unsigned long WAIT_TIME = 2000;    // wait time before sleep routine gets executed again
+unsigned long previousMillis = 0;       // will store last time sleep was interrupted
 
 //setup
 void setup() {
@@ -61,14 +64,18 @@ void setup() {
   //hall sensor
   pinMode(HALLPIN, INPUT);
 
+  i2cAddress = getaddress(); //get I2C Address and save in variable
+
 #ifdef serial
   //initialize serial
   Serial.begin(BAUDRATE);
   Serial.println("starting unit");
+  Serial.print("I2CAddress: ");
+  Serial.println(i2cAddress);
 #endif
 
   //I2C function assignment
-  Wire.begin(getaddress()); //i2c address of this unit
+  Wire.begin(i2cAddress); //i2c address of this unit
   Wire.onReceive(receiveLetter);//call-function for transfered letter via i2c
   Wire.onRequest(requestEvent); //call-funtion if master requests unit state
 
@@ -77,27 +84,27 @@ void setup() {
 }
 
 void loop() {
-/*
-  //go to sleep and wait for instructions over i2c
-  if (++counter >= WAIT_TIME)
-  {
+  unsigned long currentMillis = millis();
+  if (currentMillis - previousMillis >= WAIT_TIME) {
     byte old_ADCSRA = ADCSRA;
     // disable ADC
     ADCSRA = 0;
     set_sleep_mode (SLEEP_MODE_PWR_DOWN);
     sleep_enable();
+    digitalWrite (LED_BUILTIN, LOW);
     sleep_cpu ();
+    digitalWrite (LED_BUILTIN, HIGH);
     sleep_disable();
-    counter = 0;
+    previousMillis = currentMillis; //reset sleep counter
     ADCSRA = old_ADCSRA;
 
     // release TWI bus
     TWCR = bit(TWEN) | bit(TWIE) | bit(TWEA) | bit(TWINT);
 
     // turn it back on again
-    Wire.begin(getaddress());
+    Wire.begin (i2cAddress);
   }  // end of time to sleep
-*/
+
   //check if new letter was received through i2c
   if (displayedLetter != receivedNumber)
   {
@@ -198,8 +205,6 @@ void rotateToLetter(int toLetter) {
 }
 
 void receiveLetter(int numBytes) {
-  counter = 0; //reset counter for sleeping
-
   int receiveArray[2]; //array for received bytes
 
   for (int i = 0; i < numBytes; i++) {
@@ -212,14 +217,14 @@ void receiveLetter(int numBytes) {
 
 void requestEvent() {
   Wire.write(currentlyrotating); //send unit status to master
-/*
-#ifdef serial
-  Serial.print("Status ");
-  Serial.print(currentlyrotating);
-  Serial.print(" sent to master");
-  Serial.println();
-#endif
-*/
+  /*
+    #ifdef serial
+    Serial.print("Status ");
+    Serial.print(currentlyrotating);
+    Serial.print(" sent to master");
+    Serial.println();
+    #endif
+  */
 }
 
 //returns the adress of the unit as int from 0-15
