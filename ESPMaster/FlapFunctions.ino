@@ -1,17 +1,8 @@
 //checks for new message to show
 void showNewData(String message) {
-#ifndef serial
   if (writtenLast != message) {
     showMessage(message, convertSpeed(speedslider));
   }
-#endif
-
-#ifdef serial
-  if (writtenLast != message) {
-    Serial.println("Would be sent to display");
-    Serial.println(centerString(message));
-  }
-#endif
   writtenLast = message;
 }
 
@@ -40,7 +31,11 @@ void showMessage(String message, int flapSpeed) {
     char currentLetter = message[i];
     int currentLetterPosition = translateLettertoInt(currentLetter);
 #ifdef serial
-    Serial.println(message[i]);
+    Serial.print("Unit Nr.: ");
+    Serial.print(i);
+    Serial.print(" Letter: ");
+    Serial.print(message[i]);
+    Serial.print(" Letter position: ");
     Serial.println(currentLetterPosition);
 #endif
     writeToUnit(i, currentLetterPosition, flapSpeed);
@@ -59,14 +54,20 @@ int translateLettertoInt(char letterchar) {
 //write letter position and speed in rpm to single unit
 void writeToUnit(int address, int letter, int flapSpeed) {
   int sendArray[2] = {letter, flapSpeed}; //Array with values to send to unit
+
   Wire.beginTransmission(address);
 
   //Write values to send to slave in buffer
   for (int i = 0; i < sizeof sendArray / sizeof sendArray[0]; i++) {
+#ifdef serial
+    Serial.print("sendArray: ");
+    Serial.println(sendArray[i]);
+#endif
     Wire.write(sendArray[i]);
   }
   Wire.endTransmission(); //send values to unit
 }
+
 
 //checks if unit in display is currently moving
 bool isDisplayMoving() {
@@ -105,12 +106,12 @@ int checkIfMoving(int address) {
   Serial.println();
 #endif
   if (active == -1) {
-    Serial.println("Try to wake up unit");
 #ifdef serial
+    Serial.println("Try to wake up unit");
+#endif
     Wire.beginTransmission(address);
     Wire.endTransmission();
-#endif
-    delay(5);
+    //delay(5);
   }
   return active;
 }

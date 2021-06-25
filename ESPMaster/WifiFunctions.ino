@@ -9,7 +9,7 @@ String getCurrentInputValues() {
   values["alignment"] = alignment;
   values["speedSlider"] = speedslider;
   values["devicemode"] = devicemode;
-  
+
   String jsonString = JSON.stringify(values);
   return jsonString;
 }

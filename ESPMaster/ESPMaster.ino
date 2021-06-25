@@ -31,7 +31,7 @@ const char* password = "12345678901234567890";
 // GMT 0 = 0
 #define TIMEOFFSET 7200
 
-const char letters[] = {' ', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '#', '$', '%', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ':', '.', '-', '?', '!'};
+const char letters[] = {' ', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '$', '&', '#', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ':', '.', '-', '?', '!'};
 int displayState[UNITSAMOUNT];
 String writtenLast;
 unsigned long previousMillis = 0;
@@ -73,15 +73,14 @@ void setup() {
   Serial.begin(BAUDRATE);
   Serial.println("master start");
 #endif
-#ifndef serial
+
   Wire.begin(1, 3); //For ESP01 only
-#endif
+  //Wire.begin(D1, D2); //For NodeMCU testing only SDA=D1 and SCL=D2
 
-  initWiFi();
-  initFS();
-  setupTime();
-
-  loadFSValues();
+  initWiFi(); //initializes WiFi
+  initFS(); //initializes filesystem
+  setupTime(); //initializes ntp function
+  loadFSValues(); //loads initial values from filesystem
 
   // Web Server Root URL
   server.on("/", HTTP_GET, [](AsyncWebServerRequest * request) {
@@ -105,38 +104,50 @@ void setup() {
         // HTTP POST alignment value
         if (p->name() == PARAM_ALIGNMENT) {
           alignment = p->value().c_str();
+          #ifdef serial
           Serial.print("Alignment set to: ");
           Serial.println(alignment);
+          #endif
           writeFile(LittleFS, alignmentPath, alignment.c_str());
         }
 
         // HTTP POST speed slider value
         if (p->name() == PARAM_SPEEDSLIDER) {
           speedslider = p->value().c_str();
+          #ifdef serial
           Serial.print("Speed set to: ");
           Serial.println(speedslider);
+          #endif
           writeFile(LittleFS, speedsliderPath, speedslider.c_str());
         }
 
         // HTTP POST mode value
         if (p->name() == PARAM_DEVICEMODE) {
           devicemode = p->value().c_str();
+          #ifdef serial
           Serial.print("Mode set to: ");
           Serial.println(devicemode);
+          #endif
           writeFile(LittleFS, devicemodePath, devicemode.c_str());
         }
 
         // HTTP POST input1 value
         if (p->name() == PARAM_INPUT_1) {
           input1 = p->value().c_str();
+          #ifdef serial
           Serial.print("Input 1 set to: ");
           Serial.println(input1);
+          #endif
         }
       }
     }
     request->send(LittleFS, "/index.html", "text/html");
   });
   server.begin();
+#ifdef serial
+  Serial.println("master ready");
+#endif
+
 }
 
 void loop() {

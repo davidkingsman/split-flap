@@ -1,5 +1,5 @@
 /*********
-  Split Flap Arduino Uno Unit
+  Split Flap Arduino Nano Unit
 *********/
 
 //#define serial // uncomment for serial debug communication
@@ -50,8 +50,8 @@ int receivedNumber = 0;
 int i2cAddress;
 
 //sleep globals
-const unsigned long WAIT_TIME = 2000;    // wait time before sleep routine gets executed again
-unsigned long previousMillis = 0;       // will store last time sleep was interrupted
+const unsigned long WAIT_TIME = 2000;    //wait time before sleep routine gets executed again in milliseconds
+unsigned long previousMillis = 0;       //stores last time sleep was interrupted
 
 //setup
 void setup() {
@@ -91,9 +91,13 @@ void loop() {
     ADCSRA = 0;
     set_sleep_mode (SLEEP_MODE_PWR_DOWN);
     sleep_enable();
-    digitalWrite (LED_BUILTIN, LOW);
+#ifdef serial
+    digitalWrite (LED_BUILTIN, LOW); // shuts off LED when starting to sleep, for debugging
+#endif
     sleep_cpu ();
-    digitalWrite (LED_BUILTIN, HIGH);
+#ifdef serial
+    digitalWrite (LED_BUILTIN, HIGH); // turns on LED when waking up, for debugging
+#endif
     sleep_disable();
     previousMillis = currentMillis; //reset sleep counter
     ADCSRA = old_ADCSRA;

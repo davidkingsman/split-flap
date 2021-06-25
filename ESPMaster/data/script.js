@@ -2,9 +2,9 @@
 const form = document.getElementById('form');
 form.onsubmit = function () {
 	var r = document.getElementById('input1').value;
-	r = r.replace(/ä/gi, '#');
-	r = r.replace(/ö/gi, '$');
-	r = r.replace(/ü/gi, '%');
+	r = r.replace(/ä/gi, '$');
+	r = r.replace(/ö/gi, '&');
+	r = r.replace(/ü/gi, '#');
 	document.getElementById('input1').value = r;
 }
 
