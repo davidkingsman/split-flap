@@ -28,8 +28,8 @@ This is how my 10 units are set, 1 means switch is in the up-position:
 #### ESP01
 To upload the sketch to the ESP01 you need to install a few things to your arduino IDE.
 
-- Install the esp8266 to your Arduino IDE https://randomnerdtutorials.com/how-to-install-esp8266-board-arduino-ide/
-- Install the SPIFFS plugin to use the file system of the ESP01 https://randomnerdtutorials.com/install-esp8266-filesystem-uploader-arduino-ide/
+- Install the esp8266 board to your Arduino IDE https://randomnerdtutorials.com/how-to-install-esp8266-board-arduino-ide/
+- Install the arduino esp8266 littleFS plugin to use the file system of the ESP01, you can follow this tutorial: https://randomnerdtutorials.com/install-esp8266-nodemcu-littlefs-arduino/
 - Install the following libraries:
 	- ESPAsyncWebServer https://github.com/me-no-dev/ESPAsyncWebServer/archive/master.zip
 	- ESPAsyncTCP https://github.com/me-no-dev/ESPAsyncTCP/archive/master.zip
