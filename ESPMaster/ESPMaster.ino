@@ -19,7 +19,7 @@
 #define MINSPEED 1 //min Speed
 #define MAXSPEED 12 //max Speed
 #define ESPLED 1 //Blue LED on ESP01
-#define serial //uncomment for serial debug messages, no serial messages if this whole line is a comment!
+//#define serial //uncomment for serial debug messages, no serial messages if this whole line is a comment!
 
 // REPLACE WITH YOUR NETWORK CREDENTIALS
 const char* ssid = "SSID";
