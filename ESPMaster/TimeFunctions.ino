@@ -59,4 +59,7 @@ void setupTime() {
   //Needed for time functions
   timeClient.begin();
   timeClient.setTimeOffset(TIMEOFFSET);
+  #ifdef serial
+  Serial.println("timeClient initialized");
+#endif
 }

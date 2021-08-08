@@ -11,14 +11,15 @@
 #include <NTPClient.h>
 #include <WiFiUdp.h>
 
-#define BAUDRATE 9600
+
+#define BAUDRATE 115200
 #define ANSWERSIZE 1 //Size of units request answer
 #define UNITSAMOUNT 10 //Amount of connected units
 #define FLAPAMOUNT 45 //Amount of Flaps in each unit
 #define MINSPEED 1 //min Speed
 #define MAXSPEED 12 //max Speed
 #define ESPLED 1 //Blue LED on ESP01
-//#define serial //uncomment for serial debug messages, no serial messages if this whole line is a comment!
+#define serial //uncomment for serial debug messages, no serial messages if this whole line is a comment!
 
 // REPLACE WITH YOUR NETWORK CREDENTIALS
 const char* ssid = "SSID";
@@ -74,7 +75,10 @@ void setup() {
   Serial.println("master start");
 #endif
 
+//deactivate I2C if debugging the ESP, otherwise serial does not work
+#ifndef serial
   Wire.begin(1, 3); //For ESP01 only
+#endif
   //Wire.begin(D1, D2); //For NodeMCU testing only SDA=D1 and SCL=D2
 
   initWiFi(); //initializes WiFi
@@ -104,40 +108,40 @@ void setup() {
         // HTTP POST alignment value
         if (p->name() == PARAM_ALIGNMENT) {
           alignment = p->value().c_str();
-          #ifdef serial
+#ifdef serial
           Serial.print("Alignment set to: ");
           Serial.println(alignment);
-          #endif
+#endif
           writeFile(LittleFS, alignmentPath, alignment.c_str());
         }
 
         // HTTP POST speed slider value
         if (p->name() == PARAM_SPEEDSLIDER) {
           speedslider = p->value().c_str();
-          #ifdef serial
+#ifdef serial
           Serial.print("Speed set to: ");
           Serial.println(speedslider);
-          #endif
+#endif
           writeFile(LittleFS, speedsliderPath, speedslider.c_str());
         }
 
         // HTTP POST mode value
         if (p->name() == PARAM_DEVICEMODE) {
           devicemode = p->value().c_str();
-          #ifdef serial
+#ifdef serial
           Serial.print("Mode set to: ");
           Serial.println(devicemode);
-          #endif
+#endif
           writeFile(LittleFS, devicemodePath, devicemode.c_str());
         }
 
         // HTTP POST input1 value
         if (p->name() == PARAM_INPUT_1) {
           input1 = p->value().c_str();
-          #ifdef serial
+#ifdef serial
           Serial.print("Input 1 set to: ");
           Serial.println(input1);
-          #endif
+#endif
         }
       }
     }
@@ -147,7 +151,6 @@ void setup() {
 #ifdef serial
   Serial.println("master ready");
 #endif
-
 }
 
 void loop() {
