@@ -3,7 +3,7 @@
 *********/
 
 //#define serial // uncomment for serial debug communication
-//#define test //uncomment for Test mode. Rotates through a few character to make sure unit is working
+//#define test //uncomment for Test mode. Rotates through a few character to make sure unit is working. These characters should be displayed in the correct order: " ", "Z", "A", "U", "N", "?", "0", "1", "2", "9"
 
 #include <Arduino.h>
 #include <Wire.h>
@@ -27,7 +27,7 @@
 #define AMOUNTFLAPS 45
 
 //constants others
-#define BAUDRATE 9600
+#define BAUDRATE 115200
 #define ROTATIONDIRECTION -1 //-1 for reverse direction
 #define OVERHEATINGTIMEOUT 2 //timeout in seconds to avoid overheating of stepper. After starting rotation, the counter will start. Stepper won't move again until timeout is passed
 unsigned long lastRotation = 0;
@@ -125,12 +125,11 @@ void loop() {
     rotateToLetter(receivedNumber);
   }
 
-
   //test calibration settings
 #ifdef test
-  String calLetters[10] = {" ", "Z", "A", "U", "N", "?", "0", "1", "2", "9"};
+  int calLetters[10] = {0, 26, 1, 21, 14, 43, 30, 31, 32, 39};
   for (int i = 0; i < 10; i++) {
-    String currentCalLetter = calLetters[i];
+    int currentCalLetter = calLetters[i];
     rotateToLetter(currentCalLetter);
     delay(5000);
   }
