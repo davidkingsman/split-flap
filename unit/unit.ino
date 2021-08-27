@@ -22,7 +22,7 @@
 #define STEPPERPIN2 10
 #define STEPPERPIN3 9
 #define STEPPERPIN4 8
-#define STEPS 2038 // 28BYJ-48 stepper, number of steps
+#define STEPS 2038 //28BYJ-48 stepper, number of steps
 #define HALLPIN 7 //Pin of hall sensor
 #define AMOUNTFLAPS 45
 
