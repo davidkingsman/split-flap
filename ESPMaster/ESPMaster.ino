@@ -11,10 +11,10 @@
 #include <NTPClient.h>
 #include <WiFiUdp.h>
 
+#define UNITSAMOUNT 10 // !IMPORTANT! Amount of connected units, change this if you have a different amount of units connected
 
 #define BAUDRATE 115200
 #define ANSWERSIZE 1 //Size of units request answer
-#define UNITSAMOUNT 10 //Amount of connected units
 #define FLAPAMOUNT 45 //Amount of Flaps in each unit
 #define MINSPEED 1 //min Speed
 #define MAXSPEED 12 //max Speed

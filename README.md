@@ -50,3 +50,6 @@ Also change the timeoffset to your timezone: `#define TIMEOFFSET 7200` It is def
 
 ##### final upload
 Now you only need to upload the sketch and you are done. Stick the ESP01 onto the first unit's PCB and navigate to the IP-adress the ESP01 is getting assigned from your router.
+
+##### common mistakes
+If the ESP is not talking to the units correctly, check the UNITSAMOUNT in the ESPMaster.ino. The amount of units connected has to match.
