@@ -18,6 +18,7 @@ String getCurrentInputValues() {
 // Initialize WiFi
 void initWiFi() {
   WiFi.mode(WIFI_STA);
+  WiFi.hostname("SplitFlap");
   WiFi.begin(ssid, password);
 #ifdef serial
   Serial.print("Connecting to WiFi ..");
