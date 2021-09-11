@@ -10,11 +10,12 @@
 #include <Wire.h>
 #include <NTPClient.h>
 #include <WiFiUdp.h>
+#include <ezTime.h>
 
-#define UNITSAMOUNT 10 // !IMPORTANT! Amount of connected units, change this if you have a different amount of units connected
 
 #define BAUDRATE 115200
-#define ANSWERSIZE 1 //Size of units request answer
+#define ANSWERSIZE 1 //Size of unit's request answer
+#define UNITSAMOUNT 10 //Amount of connected units !IMPORTANT!
 #define FLAPAMOUNT 45 //Amount of Flaps in each unit
 #define MINSPEED 1 //min Speed
 #define MAXSPEED 12 //max Speed
@@ -25,12 +26,15 @@
 const char* ssid = "SSID";
 const char* password = "12345678901234567890";
 
-//CHANGE THIS TO YOUR TIMEZONE, OFFSET IN SECONDS FROM GMT
-// GMT +1 = 3600
-// GMT +8 = 28800
-// GMT -1 = -3600
-// GMT 0 = 0
-#define TIMEOFFSET 7200
+// Change this to your timezone, use the TZ database name
+// https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+String timezoneString = "Europe/Berlin";
+
+// If you want to have a different date or clock format change these two
+// Complete table with every char: https://github.com/ropg/ezTime#getting-date-and-time
+String dateFormat = "d.m.Y"; //Examples: d.m.Y -> 11.09.2021, D M y -> SAT SEP 21
+String clockFormat = "H:i"; // Examples: H:i -> 21:19, h:ia -> 09:19PM
+
 
 const char letters[] = {' ', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '$', '&', '#', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ':', '.', '-', '?', '!'};
 int displayState[UNITSAMOUNT];
@@ -59,14 +63,8 @@ const char* devicemodePath = "/devicemode.txt";
 
 JSONVar values;
 
-// Define NTP Client to get time
-WiFiUDP ntpUDP;
-NTPClient timeClient(ntpUDP, "pool.ntp.org");
+Timezone timezone; //create ezTime timezone object
 
-//Week Days
-String weekDays[7] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
-//Month names
-String months[12] = {"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"};
 
 void setup() {
   // Serial port for debugging purposes
@@ -75,7 +73,7 @@ void setup() {
   Serial.println("master start");
 #endif
 
-//deactivate I2C if debugging the ESP, otherwise serial does not work
+  //deactivate I2C if debugging the ESP, otherwise serial does not work
 #ifndef serial
   Wire.begin(1, 3); //For ESP01 only
 #endif
@@ -83,8 +81,11 @@ void setup() {
 
   initWiFi(); //initializes WiFi
   initFS(); //initializes filesystem
-  setupTime(); //initializes ntp function
   loadFSValues(); //loads initial values from filesystem
+
+  //ezTime initialization
+  waitForSync();
+  timezone.setLocation(timezoneString);
 
   // Web Server Root URL
   server.on("/", HTTP_GET, [](AsyncWebServerRequest * request) {
@@ -153,7 +154,10 @@ void setup() {
 #endif
 }
 
+
 void loop() {
+
+  events(); //ezTime library function
 
   //Reset loop delay
   unsigned long currentMillis = millis();
