@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="nl">
+
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Boom admin paneel</title>
+    <link rel="stylesheet" href="/lib/bootstrap.min.css">
+    <link rel="stylesheet" href="/lib/jquery-ui.css">
+    <link rel="stylesheet" href="/index.css">
+    <style></style>
+  </head>
+
+  <body>
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col">
+          <h1>Boom admin paneel</h1>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col">
+          <a href="#" class="btn btn-warning btn-sm emitButton" data-event="gameflow" data-property="gameflow" data-value="0">
+            Game Reset
+          </a>
+          <a href="#" class="btn btn-success btn-sm emitButton" data-event="gameflow" data-property="gameflow" data-value="1">
+            Game Start
+          </a>
+
+        </div>
+      </div>
+    </div>
+    <div id="deviceList" class="container-fluid">
+    </div>
+  </div>
+
+  <script src="/lib/jquery-3.3.1.slim.min.js"></script>
+  <script src="/lib/popper.min.js"></script>
+  <script src="/lib/bootstrap.min.js"></script>
+  <script src="/lib/jquery-1.11.1.js"></script>
+  <script src="/lib/jquery-ui.js"></script>
+  <script src="/lib/jquery.ui.touch-punch.min.js"></script>
+  <script src="/lib/socket.io.js"></script>
+  <script src="/index.js"></script>
+  <script>
+    var socket = io();
+  </script>
+</body>
+
+</html>

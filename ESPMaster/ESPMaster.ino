@@ -19,18 +19,18 @@
 #define MINSPEED 1 //min Speed
 #define MAXSPEED 12 //max Speed
 #define ESPLED 1 //Blue LED on ESP01
-//#define serial //uncomment for serial debug messages, no serial messages if this whole line is a comment!
+#define serial //uncomment for serial debug messages, no serial messages if this whole line is a comment!
 
 // REPLACE WITH YOUR NETWORK CREDENTIALS
-const char* ssid = "SSID";
-const char* password = "12345678901234567890";
+const char* ssid = "draadloos";
+const char* password = "geike123";
 
 //CHANGE THIS TO YOUR TIMEZONE, OFFSET IN SECONDS FROM GMT
 // GMT +1 = 3600
 // GMT +8 = 28800
 // GMT -1 = -3600
 // GMT 0 = 0
-#define TIMEOFFSET 7200
+#define TIMEOFFSET 3600
 
 const char letters[] = {' ', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '$', '&', '#', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ':', '.', '-', '?', '!'};
 int displayState[UNITSAMOUNT];
