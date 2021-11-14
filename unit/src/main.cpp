@@ -3,7 +3,7 @@
 *********/
 
 #define serial  // uncomment for serial debug communication
-#define test    //uncomment for Test mode. Rotates through a few character to make sure unit is working. These characters should be displayed in the correct order: " ", "Z", "A", "U", "N", "?", "0", "1", "2", "9"
+//#define test    //uncomment for Test mode. Rotates through a few character to make sure unit is working. These characters should be displayed in the correct order: " ", "Z", "A", "U", "N", "?", "0", "1", "2", "9"
 
 #include <Arduino.h>
 #include <EEPROM.h>
@@ -95,7 +95,6 @@ int calibrate(bool initialCalibration) {
 #endif
     currentlyrotating = 1;  //set active state to active
     bool reachedMarker = false;
-    bool reachedOffset = false;
     stepper.setSpeed(stepperSpeed);
     int i = 0;
     while (!reachedMarker) {
@@ -107,13 +106,11 @@ int calibrate(bool initialCalibration) {
         } else if (currentHallValue == 1) {
             //not reached yet
             stepper.step(ROTATIONDIRECTION * 1);
-        } else if ((currentHallValue == 0) && (!reachedOffset)) {
-            Serial.print("rotation direction: ");
-            Serial.println(ROTATIONDIRECTION);
+        } else if (currentHallValue == 0) {
             //reached marker, go to calibrated offset position
+            Serial.print("extra rotation: ");
+            Serial.println(calOffset);
             stepper.step(ROTATIONDIRECTION * calOffset);
-            reachedOffset = true;
-        } else if (reachedOffset) {
             reachedMarker = true;
             displayedLetter = 0;
             missedSteps = 0;
