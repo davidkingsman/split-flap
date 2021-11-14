@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include <EEPROM.h>
 
-const int offsetToWrite = 1;  // change this into the offset for this unit
+const int offsetToWrite = 45;  // change this into the offset for this unit. 45 clicks is appro one flap
 
 const int eeAddress = 0;  //Location we want the data to be put.
 int calOffsetGet;         //Variable already in EEPROM.

@@ -238,10 +238,8 @@ void requestEvent() {
 
 //gets magnet sensor offset from EEPROM in steps
 void getOffset() {
-    // EEPROM not used
     EEPROM.get(eeAddress, calOffset);
 
-    calOffset = calOffset * (STEPS / AMOUNTFLAPS);
 #ifdef serial
     Serial.print("CalOffset from EEPROM: ");
     Serial.print(calOffset);
