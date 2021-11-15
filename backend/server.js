@@ -19,7 +19,6 @@ var webSockets = {};
 var clients = {};
 var admins = {};
 
-// methods
 var getKeyByValue = function (object, value) {
   return Object.keys(object).find(key => object[key] === value);
 };
@@ -32,25 +31,6 @@ var getClientForClientConnId = function (clientConnId) {
 var getAdminForAdminConnId = function (adminConnId) {
   var admin = getKeyByValue(admins, adminConnId);
   return admin;
-};
-
-var getConnIdForClient = function (client) {
-  var connId = clients[client];
-
-  if (connId < 0) {
-    connId = false;
-  }
-
-  console.log(connId, "for", client);
-
-  return connId;
-};
-
-var getClientConnIdForAdminConnId = function (adminConnId) {
-  var admin = getKeyByValue(admins, adminConnId);
-  var connId = clients[admin];
-  //console.log(adminConnId, admin, connId);
-  return connId;
 };
 
 io.on("connection", function (webSocket) {
@@ -84,11 +64,10 @@ io.on("connection", function (webSocket) {
   webSocket.on("identifyAdmin", function (data) {
     admins[data] = connId;
 
-    var clientId = clients[data]
-      ? clients[data]
-      : 0;
-
-    webSockets[connId].send({message: "clientDetails", clientId: clientId});
+    if (clients[data]) {
+      var clientId = clients[data];
+      webSockets[connId].send({message: "clientDetails", clientId: clientId});
+    } 
 
     console.log("identify admin from", connId, ":", data);
   });
@@ -102,7 +81,7 @@ io.on("connection", function (webSocket) {
       webSockets[clientId].send({message: "valuesUpdate", data: data});
     }
   });
-  
+
 
   webSocket.on("clientRequest", function (data) {
     console.log("clientRequest");
