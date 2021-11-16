@@ -1,5 +1,12 @@
-# split-flap
-3D-files here: https://www.prusaprinters.org/prints/69464-split-flap-display
+# split-flap with socket.io
+
+This is a software remix of the wonderful project made by David Kingsman and featured here: https://www.prusaprinters.org/prints/69464-split-flap-display
+
+- Rewrote it for platform.io so all required libraries are included in the platform.ini files.
+- Communication with the display is completely rewritten. I wanted to be able to control it from other places and eventually to connect it to my home control system (work in progress). So all communication is now done via websockets.
+
+I don't know if people are interested in any further instructions on how to set up everything. If so, leave me a message ;)
+
 
 ## General
 The display's electronics use one esp01 as the master and up to 16 arduinos as slaves. The esp handles the webinterface and communicates to the units via I2C. Each unit is resposible for setting the zero position of the drum on startup and displaying any letter the master send its way.
