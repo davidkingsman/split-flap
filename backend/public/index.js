@@ -1,5 +1,5 @@
 var client = {
-  admin: "jos",
+  deviceId: false,
   id: false,
   alignment: "left", // left|center|right
   speedSlider: 50, // 1-100
@@ -49,7 +49,6 @@ var updateValues = function () {
 };
 
 var updateConnectionStatus = function () {
-    console.log(client.id);
   if (client.id) {
     $("#controlBoard").removeClass("disconnected").addClass("connected");
   } else {
@@ -57,10 +56,19 @@ var updateConnectionStatus = function () {
   }
 };
 
-$(document).ready(function () {
-    updateConnectionStatus();
-  socket.emit("identifyAdmin", client.admin);
+var toggleControlBoard = function () {
+  if (client.deviceId) {
+    $("#currentDeviceId").text(client.deviceId);
+    $("#controlBoard").show();
+    $("#deviceAdmin").hide();
+  } else {
+    $("#currentDeviceId").text("");
+    $("#deviceAdmin").show();
+    $("#controlBoard").hide();
+  }
+};
 
+$(document).ready(function () {
   socket.on("message", function (payload) {
     console.log("message");
     console.log(payload);
@@ -81,8 +89,18 @@ $(document).ready(function () {
     }
   });
 
-  $("body").on("click", ".activateMode", function () {
-    console.log($(this).data("mode"));
+  $("body").on("click", "#connectDevice", function () {
+    var deviceId = $("#deviceId").val().trim();
+    if (deviceId) {
+      client.deviceId = deviceId;
+      toggleControlBoard();
+      socket.emit("identifyAdmin", client.deviceId);
+    }
+  });
+
+  $("body").on("click", "#disconnect", function () {
+    client.deviceId = false;
+    toggleControlBoard();
   });
 
   $("#setAlignment").on("click", "a", function () {

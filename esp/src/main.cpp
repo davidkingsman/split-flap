@@ -368,18 +368,19 @@ void handleMessage(const char* payload, size_t length) {
 
     if (action == "getValues") {
         emitValues();
-    } else if (action == "setAlignment") {
-        deviceValues[ALIGNMENT].value = value;
-    } else if (action == "setSpeedSlider") {
-        deviceValues[SPEEDSLIDER].value = value;
-    } else if (action == "setDeviceMode") {
-        deviceValues[DEVICEMODE].value = value;
-    } else if (action == "setInputText") {
-        deviceValues[INPUTTEXT].value = value;
+    } else {
+        if (action == "setAlignment") {
+            deviceValues[ALIGNMENT].value = value;
+        } else if (action == "setSpeedSlider") {
+            deviceValues[SPEEDSLIDER].value = value;
+        } else if (action == "setDeviceMode") {
+            deviceValues[DEVICEMODE].value = value;
+        } else if (action == "setInputText") {
+            deviceValues[INPUTTEXT].value = value;
+        }
+        emitValues();
     }
-
-    emitValues();
-
+    
 #ifdef serial
     Serial.print("receivedText: ");
     Serial.println(receivedText);

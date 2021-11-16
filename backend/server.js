@@ -88,7 +88,6 @@ io.on("connection", function (webSocket) {
     }
   });
 
-
   webSocket.on("clientRequest", function (data) {
     console.log("clientRequest");
     console.log(data);

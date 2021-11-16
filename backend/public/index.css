@@ -14,3 +14,7 @@ h2 {
 #controlBoard.connected {
     border: 1px solid rgb(170, 255, 208);
 }
+
+.hidden {
+    display: none;
+}
