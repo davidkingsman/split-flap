@@ -5,7 +5,7 @@
 #include <WiFiUdp.h>
 #include <Wire.h>
 
-#define UNITSAMOUNT 1  // !IMPORTANT! Amount of connected units, change this if you have a different amount of units connected
+#define UNITSAMOUNT 10  // !IMPORTANT! Amount of connected units, change this if you have a different amount of units connected
 
 #define BAUDRATE 115200
 #define ANSWERSIZE 1   // Size of units request answer
@@ -34,7 +34,7 @@ const int INPUTTEXT = 3;
 #include "config.h"
 SocketIoClient webSocket;
 
-const char* backendServer = "laptop.local";  //"splitflap.postduif.be";
+const char* backendServer = "splitflap.postduif.be";
 const int backandPort = 3100;
 
 // CHANGE THIS TO YOUR TIMEZONE, OFFSET IN SECONDS FROM GMT
