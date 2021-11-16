@@ -23,8 +23,8 @@ struct deviceValue {
 deviceValue deviceValues[4] = {
     {"alignment", "left"},
     {"speedSlider", "50"},
-    {"devicemode", "none"},
-    {"inputText", "hallo"}};
+    {"deviceMode", "none"},
+    {"inputText", "HELLOWORLD"}};
 
 const int ALIGNMENT = 0;
 const int SPEEDSLIDER = 1;
@@ -377,6 +377,8 @@ void handleMessage(const char* payload, size_t length) {
     } else if (action == "setInputText") {
         deviceValues[INPUTTEXT].value = value;
     }
+
+    emitValues();
 
 #ifdef serial
     Serial.print("receivedText: ");

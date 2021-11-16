@@ -1,9 +1,9 @@
 var client = {
   id: false,
-  alignment: "left", // left|center|right
-  speedSlider: 50, // 1-100
-  deviceMode: "text", // text|date|clock
-  inputText: ""
+  alignment: "right", // left|center|right
+  speedSlider: 30, // 1-100
+  deviceMode: "clock", // text|date|clock
+  inputText: "HELLOWORLD"
 };
 
 var sendClient = function (message, data = false) {
@@ -19,18 +19,32 @@ var getValues = function () {
 
 var setSpeedSlider = function (speedSlider) {
   socket.emit("clientRequest", "setSpeedSlider|" + speedSlider);
+  console.log("setSpeedSlider", speedSlider);
 };
 
 var setAlignment = function (alignment) {
   socket.emit("clientRequest", "setAlignment|" + alignment);
+  console.log("setAlignment", alignment);
 };
 
 var setDeviceMode = function (deviceMode) {
   socket.emit("clientRequest", "setDeviceMode|" + deviceMode);
+  console.log("setDeviceMode", deviceMode);
 };
 
 var setInputText = function (inputText) {
   socket.emit("clientRequest", "setInputText|" + inputText);
+  console.log("setInputText", inputText);
+};
+
+var updateValues = function () {
+  $("#inputText").val(client.inputText);
+
+  $("#setAlignment").children().removeClass("active");
+  $("#setAlignment #" + client.alignment).addClass("active");
+  $("#setDeviceMode").children().removeClass("active");
+  $("#setDeviceMode #" + client.deviceMode).addClass("active");
+  $("#setSpeedSlider span").text(client.speedSlider);
 };
 
 $(document).ready(function () {
@@ -48,25 +62,39 @@ $(document).ready(function () {
       client.speedSlider = payload.data.speedSlider;
       client.deviceMode = payload.data.deviceMode;
       client.inputText = payload.data.inputText;
+      updateValues();
     }
   });
 
-  //setDeviceMode("text");
-  //setInputText("A");
+  $("body").on("click", ".activateMode", function () {
+    console.log($(this).data("mode"));
+  });
 
-  $("body").on("click", "#setText", function () {
-    console.log("set text");
+  $("#setAlignment").on("click", "a", function () {
+    var newAlignment = $(this).attr("id");
+    setAlignment(newAlignment);
+  });
+
+  $("#setDeviceMode").on("click", "a", function () {
+    var newDeviceMode = $(this).attr("id");
+    setDeviceMode(newDeviceMode);
+  });
+
+  $("#setSpeedSlider").on("click", "a", function () {
+    var newSpeedSlider = $(this).text();
+    setSpeedSlider(newSpeedSlider);
+  });
+
+  $("body").on("click", "#setInputText", function () {
+    var newInputText = $("#inputText").val();
+    setInputText(newInputText);
     setDeviceMode("text");
   });
-  $("body").on("click", "#setK", function () {
-    console.log("set K");
-    setInputText("K");
-  });  $("body").on("click", "#setJ", function () {
-    console.log("set J");
-    setInputText("J");
+
+  $("#inputText").on("input", function () {
+    var uppercase = $("#inputText").val().toUpperCase().replace(/[^A-Z0-9 :.\-?!]/g, "");
+    $("#inputText").val(uppercase);
   });
-  $("body").on("click", "#setClock", function () {
-    console.log("set clock");
-    setDeviceMode("clock");
-  });
+
+  updateValues();
 });
