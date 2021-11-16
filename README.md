@@ -35,6 +35,7 @@ To upload the sketch to the ESP01 you need to install a few things to your ardui
 	- ESPAsyncTCP https://github.com/me-no-dev/ESPAsyncTCP/archive/master.zip
 	- Arduino_JSON from the library manager
 	- NTPClient from the library manager
+	- ezTime from the library manager
 
 To upload sketches to the ESP01 you can either use an Arduino https://create.arduino.cc/projecthub/pratikdesai/how-to-program-esp8266-esp-01-module-with-arduino-uno-598166 or you can buy a dedicated programmer. I highly recommend getting a programmer as it makes uploading programs onto the ESP01 much faster.
 
@@ -46,10 +47,12 @@ const char* ssid = "SSID";
 const char* password = "12345678901234567890";`
 and insert your network's credentials.
 
-Also change the timeoffset to your timezone: `#define TIMEOFFSET 7200` It is defined as offset in seconds from GMT. 
+Also change the `timezoneString` to your time zone. You can find the TZ database names here: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+
+You can also modify the date and clock format easily by using this table: https://github.com/ropg/ezTime#getting-date-and-time
 
 ##### final upload
-Now you only need to upload the sketch and you are done. Stick the ESP01 onto the first unit's PCB and navigate to the IP-adress the ESP01 is getting assigned from your router.
+Now you only need to upload the sketch and you are done. Stick the ESP01 onto the first unit's PCB and navigate to the IP-address the ESP01 is getting assigned from your router.
 
 ##### common mistakes
 If the ESP is not talking to the units correctly, check the UNITSAMOUNT in the ESPMaster.ino. The amount of units connected has to match.
