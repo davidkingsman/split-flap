@@ -1,7 +1,8 @@
 var client = {
+  admin: "jos",
   id: false,
-  alignment: "right", // left|center|right
-  speedSlider: 30, // 1-100
+  alignment: "left", // left|center|right
+  speedSlider: 50, // 1-100
   deviceMode: "clock", // text|date|clock
   inputText: "HELLOWORLD"
 };
@@ -47,15 +48,26 @@ var updateValues = function () {
   $("#setSpeedSlider span").text(client.speedSlider);
 };
 
+var updateConnectionStatus = function () {
+    console.log(client.id);
+  if (client.id) {
+    $("#controlBoard").removeClass("disconnected").addClass("connected");
+  } else {
+    $("#controlBoard").removeClass("connected").addClass("disconnected");
+  }
+};
+
 $(document).ready(function () {
-  socket.emit("identifyAdmin", "jos");
+    updateConnectionStatus();
+  socket.emit("identifyAdmin", client.admin);
 
   socket.on("message", function (payload) {
     console.log("message");
     console.log(payload);
 
     if (payload.message == "clientDetails") {
-      client.id = payload.clientid;
+      client.id = payload.clientId;
+      updateConnectionStatus();
       getValues();
     } else if (payload.message == "valuesUpdate") {
       client.alignment = payload.data.alignment;
@@ -63,6 +75,9 @@ $(document).ready(function () {
       client.deviceMode = payload.data.deviceMode;
       client.inputText = payload.data.inputText;
       updateValues();
+    } else if (payload.message == "disconnect") {
+      client.id = false;
+      updateConnectionStatus();
     }
   });
 
@@ -95,6 +110,4 @@ $(document).ready(function () {
     var uppercase = $("#inputText").val().toUpperCase().replace(/[^A-Z0-9 :.\-?!]/g, "");
     $("#inputText").val(uppercase);
   });
-
-  updateValues();
 });

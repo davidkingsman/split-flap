@@ -44,6 +44,12 @@ io.on("connection", function (webSocket) {
   console.log("a client connected: " + connId);
 
   webSocket.on("disconnect", function (msg) {
+    var clientId = admins[getClientForClientConnId(connId)];
+
+    if (clientId) {
+      webSockets[clientId].send({message: "disconnect", data: false});
+    }
+
     delete webSockets[connId];
     delete getClientForClientConnId(connId);
     delete getAdminForAdminConnId(connId);

@@ -12,11 +12,11 @@
 
   <body>
     <div class="container-fluid">
-      <div class="row">
-        <div class="col">
-          <h1>Splitflap control</h1>
+      <h1>Splitflap control</h1>
+      <div id="controlBoard" class="row">
+        <div class="col col-md-6">
+          <h2>Displaytext</h2>
           <div class="row">
-            <h2>Displaytext</h2>
             <div class="col-auto">
               <input type="text" class="form-control" id="inputText" placeholder="hello" maxlength="10" style="max-width: 140px">
             </div>
@@ -24,21 +24,24 @@
               <a id="setInputText" href="#" class="btn btn-primary">Set text</a>
             </div>
           </div>
-
+        </div>
+        <div class="col col-md-6">
           <h2>Text Alignment</h2>
           <div id="setAlignment" class="btn-group">
             <a href="#" id="left" class="btn btn-primary">left</a>
             <a href="#" id="center" class="btn btn-primary">center</a>
             <a href="#" id="right" class="btn btn-primary">right</a>
           </div>
-
+        </div>
+        <div class="col col-md-6">
           <h2>Device mode</h2>
           <div id="setDeviceMode" class="btn-group">
             <a href="#" id="text" class="btn btn-primary">text</a>
             <a href="#" id="date" class="btn btn-primary">date</a>
             <a href="#" id="clock" class="btn btn-primary">clock</a>
           </div>
-
+        </div>
+        <div class="col col-md-6">
           <h2>Slider speed</h2>
           <div id="setSpeedSlider" class="dropdown">
             <button class="btn btn-primary dropdown-toggle" type="button" id="setSpeedSliderButtons" data-bs-toggle="dropdown" aria-expanded="false">

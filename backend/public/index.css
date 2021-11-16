@@ -1,3 +1,16 @@
 h2 {
     margin-top: 40px;
 }
+
+#controlBoard {
+    padding-bottom: 40px;
+}
+
+#controlBoard.disconnected {
+    background: repeating-linear-gradient( 45deg, #fff, #fff 30px, #eee 30px, #eee 60px);
+    border: 1px solid rgb(255, 170, 170);
+}
+
+#controlBoard.connected {
+    border: 1px solid rgb(170, 255, 208);
+}
