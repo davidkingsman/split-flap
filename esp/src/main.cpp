@@ -423,7 +423,7 @@ void setup() {
 #endif
 
 #ifdef serial
-    Wire.begin(D1, D2);
+    Wire.begin(D1, D2); // for esp8266
 #endif
 
     setupTime();  // initializes ntp function
