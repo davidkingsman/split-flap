@@ -2,7 +2,7 @@
 #include <Wire.h>
 
 #define DISPLAY_ERROR false
-#define LOOP_DELAY 10000
+#define LOOP_DELAY 5000
 #define USER_PIN true
 
 // Customize I2C bus pins for ESP8266 or ESP32
@@ -17,7 +17,7 @@ String I2Ctest() {
     s = "Scanning...\n";
 
     nDevices = 0;
-    for (address = 1; address < 127; address++) {
+    for (address = 0; address < 127; address++) {
         Wire.beginTransmission(address);
         error = Wire.endTransmission();
 
