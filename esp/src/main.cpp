@@ -20,11 +20,13 @@ struct deviceValue {
     String value;
 };
 
-deviceValue deviceValues[4] = {
+const uint8_t deviceValueCount = 5;
+deviceValue deviceValues[deviceValueCount] = {
     {"alignment", "left"},
     {"speedSlider", "50"},
-    {"deviceMode", "none"},
-    {"inputText", "HELLOWORLD"}};
+    {"deviceMode", "date"},
+    {"inputText", "HELLOWORLD"},
+    {"unitCount", String(UNITSAMOUNT)}};
 
 const int ALIGNMENT = 0;
 const int SPEEDSLIDER = 1;
@@ -255,35 +257,40 @@ void showNewData(String message) {
 void showDate() {
     timeClient.update();
 
-    unsigned long epochTime = timeClient.getEpochTime();
+    time_t rawtime = timeClient.getEpochTime();
+    struct tm* ti;
+    ti = localtime(&rawtime);
 
-    String weekDay = weekDays[timeClient.getDay()];
+    uint8_t monthDay = ti->tm_mday;
+    uint8_t currentMonth = ti->tm_mon + 1;
+    uint16_t currentYear = ti->tm_year + 1900;
+
 #ifdef serial
-    Serial.print("Week Day: ");
-    Serial.println(weekDay);
+    Serial.print("date: ");
+    Serial.println(monthDay);
+    Serial.println(currentMonth);
+    Serial.println(currentYear);
 #endif
-    // Get a time structure
-    struct tm* ptm = gmtime((time_t*)&epochTime);
-
-    int monthDay = ptm->tm_mday;
-    int currentMonth = ptm->tm_mon + 1;
-    int currentYear = ptm->tm_year + 1900;
-
-    String currentMonthName = months[currentMonth - 1];
 
     String currentDate;
 
     // Add leading zeroes
     if (monthDay < 10 && currentMonth < 10) {
-        currentDate = "0" + String(monthDay) + "." + "0" + String(currentMonth) + "." + String(currentYear);
+        currentDate = "0" + String(monthDay) + "-" + "0" + String(currentMonth) + "-" + String(currentYear);
     } else if (currentMonth < 10) {
-        currentDate = String(monthDay) + "." + "0" + String(currentMonth) + "." + String(currentYear);
+        currentDate = String(monthDay) + "-" + "0" + String(currentMonth) + "-" + String(currentYear);
     } else if (monthDay < 10) {
-        currentDate = "0" + String(monthDay) + "." + String(currentMonth) + "." + String(currentYear);
+        currentDate = "0" + String(monthDay) + "-" + String(currentMonth) + "-" + String(currentYear);
     } else {
-        currentDate = String(monthDay) + "." + String(currentMonth) + "." + String(currentYear);
+        currentDate = String(monthDay) + "-" + String(currentMonth) + "-" + String(currentYear);
     }
-    showNewData(currentDate);
+
+#ifdef serial
+    Serial.print("string date: ");
+    Serial.println(currentDate);
+#endif
+
+     showNewData(currentDate);
 }
 
 void showClock() {
@@ -348,7 +355,7 @@ void emitValues() {
     strcpy(payload, "");
     strcpy(valueString, "");
 
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < deviceValueCount; i++) {
         sprintf(valueString, valueTemplate, deviceValues[i].property, deviceValues[i].value);
         if (strlen(payload) > 0) {
             strcat(payload, ",");
@@ -380,7 +387,7 @@ void handleMessage(const char* payload, size_t length) {
         }
         emitValues();
     }
-    
+
 #ifdef serial
     Serial.print("receivedText: ");
     Serial.println(receivedText);
@@ -423,7 +430,7 @@ void setup() {
 #endif
 
 #ifdef serial
-    Wire.begin(D1, D2); // for esp8266
+    Wire.begin(D1, D2);  // for esp8266
 #endif
 
     setupTime();  // initializes ntp function
