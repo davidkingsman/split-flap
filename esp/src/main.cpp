@@ -290,7 +290,7 @@ void showDate() {
     Serial.println(currentDate);
 #endif
 
-     showNewData(currentDate);
+    showNewData(currentDate);
 }
 
 void showClock() {
@@ -314,6 +314,13 @@ void showClock() {
         currentTime = String(currentHour) + ":" + String(currentMinute);
     }
     showNewData(currentTime);
+}
+
+void doReset() {
+    deviceValues[INPUTTEXT].value = "          ";
+    deviceValues[DEVICEMODE].value = "text";
+    writtenLast = deviceValues[INPUTTEXT].value;
+    showMessage(deviceValues[INPUTTEXT].value, convertSpeed(deviceValues[SPEEDSLIDER].value));
 }
 
 void setupTime() {
@@ -443,14 +450,14 @@ void setup() {
 void loop() {
     webSocket.loop();
 
-    //Reset loop delay
+    // Reset loop delay
     unsigned long currentMillis = millis();
 
-    //Delay to not spam web requests
+    // Delay to not spam web requests
     if (currentMillis - previousMillis >= 1024) {
         previousMillis = currentMillis;
 
-        //Mode Selection
+        // Mode Selection
         if (deviceValues[DEVICEMODE].value == "text") {
 #ifdef serial
             Serial.println("text");
@@ -461,6 +468,8 @@ void loop() {
             showDate();
         } else if (deviceValues[DEVICEMODE].value == "clock") {
             showClock();
+        } else if (deviceValues[DEVICEMODE].value == "reset") {
+            doReset();
         }
     }
 }
