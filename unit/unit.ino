@@ -81,6 +81,16 @@ void setup() {
 
   getOffset();     //get calibration offset from EEPROM
   calibrate(true); //home stepper after startup
+
+  //test calibration settings
+#ifdef test
+  int calLetters[10] = {0, 26, 1, 21, 14, 43, 30, 31, 32, 39};
+  for (int i = 0; i < 10; i++) {
+    int currentCalLetter = calLetters[i];
+    rotateToLetter(currentCalLetter);
+    delay(5000);
+  }
+#endif
 }
 
 void loop() {
@@ -124,16 +134,6 @@ void loop() {
     //rotate to new letter
     rotateToLetter(receivedNumber);
   }
-
-  //test calibration settings
-#ifdef test
-  int calLetters[10] = {0, 26, 1, 21, 14, 43, 30, 31, 32, 39};
-  for (int i = 0; i < 10; i++) {
-    int currentCalLetter = calLetters[i];
-    rotateToLetter(currentCalLetter);
-    delay(5000);
-  }
-#endif
 }
 
 //rotate to letter

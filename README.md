@@ -49,7 +49,7 @@ and insert your network's credentials.
 
 Also change the `timezoneString` to your time zone. You can find the TZ database names here: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
 
-You can also modify the date and clock format easily by using this table: https://github.com/ropg/ezTime#getting-date-and-time
+You can also modify the date and clock format easily by using this table: https://github.com/ropg/ezTime#datetime
 
 ##### final upload
 Now you only need to upload the sketch and you are done. Stick the ESP01 onto the first unit's PCB and navigate to the IP-address the ESP01 is getting assigned from your router.
