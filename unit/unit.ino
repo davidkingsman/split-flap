@@ -202,7 +202,7 @@ void rotateToLetter(int toLetter) {
 #ifdef serial
       Serial.println("letter unknown, go to space");
 #endif
-      desiredLetter = " ";
+      desiredLetter = 0;
     }
   }
 }
