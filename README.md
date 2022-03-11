@@ -1,4 +1,5 @@
-# split-flap
+# Split-Flap
+<img src="https://media.prusaprinters.org/media/prints/69464/images/757807_e77ddd2d-72e7-44ac-a8ae-af2382483195/thumbs/inside/1920x1440/jpg/titlepic.webp" alt="Image of Split-Flap" width="600"/>
 3D-files here: https://www.prusaprinters.org/prints/69464-split-flap-display
 
 ## General
