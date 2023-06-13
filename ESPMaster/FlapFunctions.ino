@@ -38,7 +38,10 @@ void showMessage(String message, int flapSpeed) {
     Serial.print(" Letter position: ");
     Serial.println(currentLetterPosition);
 #endif
-    writeToUnit(i, currentLetterPosition, flapSpeed);
+    //only write to unit if char exists in letter array
+    if (currentLetterPosition != -1) {
+      writeToUnit(i, currentLetterPosition, flapSpeed);
+    }
   }
 }
 
@@ -49,6 +52,7 @@ int translateLettertoInt(char letterchar) {
       return i;
     }
   }
+  return -1;
 }
 
 //write letter position and speed in rpm to single unit
