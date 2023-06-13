@@ -62,7 +62,7 @@ void writeToUnit(int address, int letter, int flapSpeed) {
   Wire.beginTransmission(address);
 
   //Write values to send to slave in buffer
-  for (int i = 0; i < sizeof sendArray / sizeof sendArray[0]; i++) {
+  for (unsigned int i = 0; i < sizeof sendArray / sizeof sendArray[0]; i++) {
 #ifdef serial
     Serial.print("sendArray: ");
     Serial.println(sendArray[i]);
@@ -101,7 +101,7 @@ bool isDisplayMoving() {
 //checks if single unit is moving
 int checkIfMoving(int address) {
   int active;
-  Wire.requestFrom(address, ANSWERSIZE, true);
+  Wire.requestFrom(address, ANSWERSIZE, 1);
   active = Wire.read();
 #ifdef serial
   Serial.print(address);

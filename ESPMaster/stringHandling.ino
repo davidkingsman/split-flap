@@ -22,7 +22,7 @@ String leftString(String message) {
 
   char leftAlignString[UNITSAMOUNT + 1];
 
-  for (int i = 0; i < UNITSAMOUNT + 1; i++) {
+  for (unsigned int i = 0; i < UNITSAMOUNT + 1; i++) {
     if (i < message.length()) {
       leftAlignString[i] = message[i];
     } else if (i == UNITSAMOUNT) {
