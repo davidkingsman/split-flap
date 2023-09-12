@@ -1,133 +1,296 @@
 html {
-font-family: Arial, Helvetica, sans-serif;
-display: inline-block;
-text-align: center;
+	font-family: Arial, Helvetica, sans-serif;
+	display: inline-block;
+	text-align: center;
 }
 
 body {
-	background-color: grey;
+	background-color: #333;
 }
 
 h1 {
-font-size: 1.8rem;
-color: white;
+	font-size: 1.9rem;
+	color: white;
 }
 
 p {
-font-size: 1.4rem;
-}
-
-.topnav {
-overflow: hidden;
-background-color: #0A1128;
+	font-size: 1.4rem;
 }
 
 body {
-margin: 0;
+	margin: 0;
 }
 
-.content {
-padding: 5%;
-}
-
-.card-grid {
-max-width: 800px;
-margin: 0 auto;
-display: grid;
-grid-gap: 2rem;
-grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-}
-
-.card {
-background-color: white;
-box-shadow: 2px 2px 12px 1px rgba(243,243,243,.5);
-}
-
-.card-title {
-font-size: 1.2rem;
-font-weight: bold;
-color: #034078
+label {
+	font-size: 1.2rem;
 }
 
 input[type=submit] {
-border: none;
-color: #FEFCFB;
-background-color: #034078;
-padding: 15px 15px;
-text-align: center;
-text-decoration: none;
-display: inline-block;
-font-size: 16px;
-width: 100px;
-margin-right: 10px;
-border-radius: 4px;
-transition-duration: 0.4s;
+	border: none;
+	color: #FEFCFB;
+	background-color: #F8880E;
+	padding: 15px 15px;
+	text-align: center;
+	text-decoration: none;
+	display: inline-block;
+	font-size: 16px;
+	width: 120px;
+	margin-right: 10px;
+	border-radius: 4px;
+	transition-duration: 0.4s;
 }
 
 input[type=submit]:hover {
-background-color: #1282A2;
+	background-color: #FFB96D;
+	cursor: pointer;
 }
 
-input[type=text], select {
-width: 50%;
-padding: 12px 20px;
-margin: 18px;
-display: inline-block;
-border: 1px solid #ccc;
-border-radius: 4px;
-box-sizing: border-box;
+input[type=text],
+select {
+	width: 50%;
+	padding: 12px 20px;
+	margin: 10px;
+	display: inline-block;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	box-sizing: border-box;
 }
 
-.alignmentInputs {
-  text-align: left;
-  margin: auto;
-  width: 40%;
-  line-height: 0.6;
-  white-space: nowrap;
+input[type=radio],
+input[type=checkbox] {
+	accent-color: orangered;
+}
+
+input[type=datetime-local] {
+	width: 150px;
+}
+
+.topnav {
+	background-color: #F8880E;
+	padding: 0 10px;
+	font-size: 0.8em;
+	color: #333;
+}
+
+.topnav label {
+	font-size: 0.8em;
+}
+
+.float-container {
+	overflow: hidden;
+}
+
+.float-left {
+	float: left;
+}
+
+.float-right {
+	float: right;
+}
+
+.content {
+	padding: 25px;
+}
+
+.card-grid {
+	max-width: 800px;
+	margin: 0 auto;
+	display: grid;
+	grid-gap: 2rem;
+	grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+	margin-bottom: 2rem;
+}
+
+.card {
+	background-color: white;
+	box-shadow: 2px 2px 10px 1px rgba(230, 230, 230, .5);
+}
+
+.card.card-full {
+	grid-column: span 2;
+}
+
+.card-title {
+	font-size: 1.2rem;
+	font-weight: bold;
+	color: #F8880E;
+}
+
+.card .character-count {
+	display: block;
+	font-size: 14px;
+}
+.card .character-count label {
+	font-size: 14px;
+}
+
+.alignment-inputs {
+	text-align: left;
+	margin: auto;
+	width: 40%;
+	line-height: 0.6;
+	white-space: nowrap;
 }
 
 .devicemode {
 	padding-bottom: 20px;
 }
 
-label {
-font-size: 1.2rem;
-}
-
-.value{
-font-size: 1.2rem;
-color: #1282A2;
+.value {
+	font-size: 1.2rem;
+	color: #1282A2;
 }
 
 .slider {
--webkit-appearance: none;
-margin: 0 auto;
-width: 90%;
-height: 17px;
-border-radius: 10px;
-background: #FFD65C;
-outline: none;
+	-webkit-appearance: none;
+	margin: 0 auto;
+	width: 90%;
+	height: 17px;
+	border-radius: 10px;
+	background: #FFD65C;
+	outline: none;
 }
 
 .slider::-webkit-slider-thumb {
--webkit-appearance: none;
-appearance: none;
-width: 25px;
-height: 25px;
-border-radius: 50%;
-background: #034078;
-cursor: pointer;
+	-webkit-appearance: none;
+	appearance: none;
+	width: 25px;
+	height: 25px;
+	border-radius: 50%;
+	background: #F8880E;
+	cursor: pointer;
 }
 
 .slider::-moz-range-thumb {
-width: 25px;
-height: 25px;
-border-radius: 50% ;
-background: #034078;
-cursor: pointer;
+	width: 25px;
+	height: 25px;
+	border-radius: 50%;
+	background: #034078;
+	cursor: pointer;
 }
 
 .switch {
-padding-left: 5%;
-padding-right: 5%;
+	padding-left: 5%;
+	padding-right: 5%;
 }
+
+.scheduled-messages {
+	width: 100%;
+}
+
+.message {
+	padding: 5px;
+	margin: 5px;
+	display: flex;
+	align-content: center;
+    align-items: stretch;
+}
+
+.message .time {
+	padding: 5px;
+	width: calc(30% - 10px);
+	background-color: #FFB96D;
+	display: flex;
+	align-items: center;
+    justify-content: center;
+}
+.message .text {
+	text-align: left;
+	padding: 5px;
+	width: calc(50% - 10px);
+	background-color: #fff;
+}
+
+.message .action {
+	text-align: right;
+	width: calc(20% - 10px);
+	display: flex;
+	justify-content: end;
+}
+
+.message .action .remove-button {
+	width: 90px;
+	padding: 5px 10px;
+	border: none;
+	color: #FEFCFB;
+	background-color: #F8880E;
+	text-align: center;
+	text-decoration: none;
+	font-size: 16px;
+	border-radius: 4px;
+	transition-duration: 0.4s;
+}
+
+.message .action .remove-button:hover {
+	background-color: #FFB96D;
+	cursor: pointer;
+}
+
+@media (max-width: 700px) {
+	.message {
+		flex-wrap: wrap;
+		padding-bottom: 20px;
+		border-bottom: 1px solid #F8880E;
+	}
+
+	.message:last-child {
+		border-bottom: none;
+	}
+
+	.message .time {
+		width: 100%;
+	}
+
+	.message .text {
+		width: 100%;
+	}
+	
+	.message .action {
+		width: 100%;
+		justify-content: center;
+	}
+}
+
+/* Loading Processing CSS from https://loading.io/css/ */
+.lds-facebook {
+	display: inline-block;
+	position: relative;
+	width: 80px;
+	height: 45px;
+  }
+
+  .lds-facebook div {
+	display: inline-block;
+	position: absolute;
+	left: 8px;
+	width: 12px;
+	background: #F8880E;
+	animation: lds-facebook 1.2s cubic-bezier(0, 0.5, 0.5, 1) infinite;
+  }
+
+  .lds-facebook div:nth-child(1) {
+	left: 15px;
+	animation-delay: -0.24s;
+  }
+
+  .lds-facebook div:nth-child(2) {
+	left: 34px;
+	animation-delay: -0.12s;
+  }
+
+  .lds-facebook div:nth-child(3) {
+	left: 53px;
+	animation-delay: 0;
+  }
+
+  @keyframes lds-facebook {
+	0% {
+	  top: 8px;
+	  height: 64px;
+	}
+	50%, 100% {
+	  top: 24px;
+	  height: 32px;
+	}
+  }
+  

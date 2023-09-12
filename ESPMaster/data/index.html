@@ -1,76 +1,117 @@
 <!DOCTYPE html>
 <html>
-	<head>
-		<title>Split-Flap</title>
-		<meta name="viewport" content="width=device-width, initial-scale=1" charset="utf-8" />
-		<link rel="icon" type="image/png" href="favicon.png" />
-		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css"
-    integrity="sha384- fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="an onymous" />
-		<link rel="stylesheet" type="text/css" href="style.css" />
-	</head>
-	<body>
-		<div class="topnav">
-			<h1>SPLIT-FLAP</h1>
-		</div>
-		<div class="content">
+
+<head>
+	<title>Split-Flap</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1" charset="utf-8" />
+	<link rel="icon" type="image/png" href="favicon.png" />
+	<link rel="stylesheet" type="text/css" href="style.css" />
+</head>
+
+<body>
+	<div class="topnav float-container">
+		<h1 class="float-left">Split Flap UI</h1>
+		<h4 class="float-right" style="text-align: right;">
+			Version: <label id="labelVersion">N/A</label>
+			<br>
+			Flaps: <label id="labelUnits">N/A</label>
+			<br>
+			Last Received Time: <label id="labelLastMessageReceived">N/A</label>
+		</h4>
+	</div>
+	<div class="content">
+		<form action="/" method="post" id="form">
 			<div class="card-grid">
 				<div class="card">
-					<form action="/" method="post" id="form">
-						<p class="card-title">General</p>
-						<p style= "font-size: 1.2rem;">Text Alignment</p>
-						<div class ="alignmentInputs">
-							<p>
-								<input type="radio" id="textleft" name="alignment" autocomplete="off" value="left" /> 
-								<label for="textleft">left-aligned</label> 
-							</p>
-							<p>
-								<input type="radio" id="textcenter" name="alignment" autocomplete="off" value="center" />
-								<label for="textcenter">centered</label> 							
-							</p>
-							<p>
-								<input type="radio" id="textright" name="alignment" autocomplete="off" value="right" />
-								<label for="textright">right-aligned</label>
-							</p>
-						</div>
-
-						<div style="margin-top: 2em;">
-							<label for="SpeedSlider">Flap Speed</label>
-							<p class="switch"/>
-
-							<input type="range" oninput="updateSpeedSlider(this)" id="SpeedSlider" name="speedslider" min="1" max="100" step="1" value="80" class="slider" />
-							<p class="state">Speed: 
-								<span id="textSpeedSliderValue"/> &percnt;</p>
-						</div>
-					</div>
-					<div class="card">
-						<p class="card-title">Text</p>       
-						<input type="radio" id="modetext" name="devicemode" value="text" />
-						<label for="modetext">Text Mode</label> 
+					<p class="card-title">General</p>
+					<p style="font-size: 1.2rem;">Text Alignment</p>
+					<div class="alignment-inputs">
 						<p>
-							<label for="input1">Input 1</label> 
-							<input type="text" id="input1" name="input1" autocomplete="off" maxlength="10" /> 
-							<input type="submit" value="Submit" />
+							<input type="radio" id="radioLeft" name="alignment" autocomplete="off" value="left" />
+							<label for="radioLeft">Left</label>
+						</p>
+						<p>
+							<input type="radio" id="radioCenter" name="alignment" autocomplete="off" value="center" />
+							<label for="radioCenter">Center</label>
+						</p>
+						<p>
+							<input type="radio" id="radioRight" name="alignment" autocomplete="off" value="right" />
+							<label for="radioRight">Right</label>
 						</p>
 					</div>
-					<div class="card">
-						<p class="card-title">Date</p>
-						<div class = "devicemode">
-							<input type="radio" id="modedate" name="devicemode" value="date" />
-							<label for="modedate">Date Mode</label> 
-						</div>
+
+					<div style="margin-top: 2em;">
+						<label for="rangeFlapSpeed">Flap Speed</label>
+						<p class="switch" />
+
+						<input type="range" oninput="updateSpeedSlider(this)" id="rangeFlapSpeed" name="flapSpeed"
+							min="1" max="100" step="1" value="80" class="slider" />
+						<p class="state">Speed:
+							<span id="rangeFlapSpeedValue" />80 &percnt;
+						</p>
 					</div>
-					<div class="card">
-						<p class="card-title">Clock</p>
-						<div class = "devicemode">
-							<input type="radio" id="modeclock" name="devicemode" value="clock" />
-							<label for="modeclock">Clock Mode</label> 
+				</div>
+
+				<div class="card">
+					<p class="card-title">Modes</p>
+					<p>
+						<input type="radio" id="modeClock" name="deviceMode" value="clock" />
+						<label for="modeClock">Clock Mode</label>
+					</p>
+
+					<p>
+						<input type="radio" id="modeDate" name="deviceMode" value="date" />
+						<label for="modeDate">Date Mode</label>
+					</p>
+
+					<p>
+						<input type="radio" id="modeText" name="deviceMode" value="text" />
+						<label for="modeText">Text Mode</label>
+					</p>
+
+					<p>
+						<label for="inputText">Text</label>
+						<input type="text" id="inputText" name="inputText" onkeyup="updateCharacterCount()" autocomplete="off" maxlength="75" />
+						<span class="character-count">
+							<label id="labelCharacterCount">0</label> Character(s)
+						</span>						
+						<span>
+							<input type="button" value="+ Newline" onclick="addNewline()"/>
+						</span>
+					</p>
+
+					<p>
+						<label for="scheduledDateTime">Schedule Message?</label>
+						<input type="checkbox" id="inputCheckboxScheduleEnabled" name="scheduleEnabled"
+							onchange="showHideScheduledMessageInput()" />
+						<br>
+						<input type="datetime-local" style="display: none;" id="inputScheduledDateTime"
+							name="scheduleDateTime">
+						<input type="hidden" id="inputHiddenScheduledDateTimeUnix" name="scheduledDateTimeUnix" />
+					</p>
+
+					<p>
+						<div id="containerSubmit">
+							<input type="submit" value="Submit" />
 						</div>
-						<p/>
-					</div>	
-				</form>		
+					</p>
+				</div>
 			</div>
-		</div>
-		<script src="script.js"/>
+		</form>
+
+		<form>
+			<div class="card-grid">
+				<div class="card card-full">
+					<p class="card-title">Scheduled Messages (<span id="spanScheduledMessageCount">0</span>)</p>
+
+					<div id="containerScheduledMessages" class="scheduled-messages">
+					</div>
+				</div>
+			</div>
+		</form>
+	</div>
+	<script src="script.js" />
 	</script>
 </body>
+
 </html>
