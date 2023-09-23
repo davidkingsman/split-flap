@@ -2,6 +2,9 @@
 <img src="https://media.prusaprinters.org/media/prints/69464/images/757807_e77ddd2d-72e7-44ac-a8ae-af2382483195/thumbs/inside/1920x1440/jpg/titlepic.webp" alt="Image of Split-Flap" width="600"/>
 3D-files here: https://www.prusaprinters.org/prints/69464-split-flap-display
 
+## Notable Forks
+As I'm not actively maintaining and developing the code further, here are some forks:
+- https://github.com/JonnyBooker/split-flap
 ## General
 The display's electronics use one esp01 as the master and up to 16 arduinos as slaves. The esp handles the webinterface and communicates to the units via I2C. Each unit is resposible for setting the zero position of the drum on startup and displaying any letter the master send its way.
 
