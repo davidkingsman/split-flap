@@ -30,12 +30,12 @@ Also the code has been refactored to try facilitate easier development:
 3D-files here on [Printables](https://www.prusaprinters.org/prints/69464-split-flap-display)!
 
 ## General
-The display's electronics use one ESP01 as the master and up to 16 Arduinos as slaves. The esp handles the web interface and communicates to the units via I2C. Each unit is resposible for setting the zero position of the drum on startup and displaying any letter the master send its way.
+The display's electronics use 1 x ESP01 as the master and up to 16 Arduinos as slaves. The ESP handles the web interface and communicates to the units via I2C. Each unit is resposible for setting the zero position of the drum on startup and displaying any letter the master send its way.
 
-Assemble everything according to the instruction manual.
+Assemble everything according to the instruction manual which you can find on [GitHub](./Instructions/SplitFlapInstructions.pdf).
 
 ### PCB
-Gerber files are in the `PCB` folder. You need one per unit. Populate components according to the instruction manual on PrusaPrinters. 
+Gerber files are in the `PCB` folder. These are the scehematics for the PCB boards and say, what is needed and where. You need one per unit. Populate components according to the [instruction manual](./Instructions/SplitFlapInstructions.pdf). 
 
 Options to potentially get boards created for you:
 - [PCB Way](https://www.pcbway.com/)
@@ -44,12 +44,11 @@ Options to potentially get boards created for you:
 > Note: Services are offered by these companies to assembly the boards for you. There are surface mounted components to these devices that you might not be able to do yourself like small resistors for instance, which must be flow soldered. It could be worth having the company do this aspect for you.
 
 ### Unit
-Each split-flap unit consists of an Arduino Nano mounted on a custom pcb. It controls a 28BYJ-48 stepper motor via a ULN2003 driver chip. The drum with the flaps is homed with a KY003 hall sensor and a magnet mounted to the drum.
+Each split-flap unit consists of an Arduino Nano mounted on a custom PCB. It controls a 28BYJ-48 stepper motor via a ULN2003 driver chip. The drum with the flaps is homed with a KY003 hall sensor and a magnet mounted to the drum.
 
-Upload the Arduino sketch `unit.ino` in the unit folder to each unit's arduino nano. Before that set the offset with the "eeprom write offset" sketch. 
+Upload the Arduino sketch `unit.ino` in the unit folder to each unit's arduino nano. Before that set the offset with the `EEPROM_Write_Offset.ino` sketch. 
 
-Inside `unit.ino`, there is a setting for testing the units so that a few
-letters are cycled through. At the top of the file once you have opened the project, you will find a line that is commented out:
+Inside `unit.ino`, there is a setting for testing the units so that a few letters are cycled through to ensure what is shown is what you expect. At the top of the file once you have opened the project, you will find a line that is commented out:
 ```c++
 #define serial 	// uncomment for serial debug communication
 #define test 	//uncomment for Test mode. 
@@ -72,15 +71,17 @@ This is how my 10 units are set, 1 means switch is in the up-position:
 | 0000 | 0001 | 0010 | 0011 | 0100 | 0101 | 0110 | 0111 | 1000 | 1001 |
 
 ### ESP01
+#### Pre-requistites
 To upload the sketch to the ESP01 you need to install a few things to your arduino IDE.
 - Install the ESP8266 board to your Arduino IDE 
 	- https://randomnerdtutorials.com/how-to-install-esp8266-board-arduino-ide/
 - Install the arduino esp8266 littleFS plugin to use the file system of the ESP01, you can follow this tutorial: 
 	- https://randomnerdtutorials.com/install-esp8266-nodemcu-littlefs-arduino/
 - Install the following libraries via Library Manager:
-  - Arduino_JSON
-  - NTPClient
-  - ezTime
+  - Arduino_JSON: https://github.com/arduino-libraries/Arduino_JSON
+  - NTPClient: https://github.com/arduino-libraries/NTPClient
+  - ezTime: https://github.com/ropg/ezTime
+  - LinkedList: https://github.com/ivanseidel/LinkedList
 - Install the following libraries via including the included `.zip` folders in the `ArduinoLibraries` in this repository in your Arduino Libraries IDE libaries folder:
 	- ESPAsyncWebServer
     	- Downloaded From: https://github.com/me-no-dev/ESPAsyncWebServer/archive/master.zip
@@ -93,9 +94,14 @@ To upload sketches to the ESP01 you can either use an [Arduino Uno](https://crea
 
 > Note: Be wary of ESP01 programmers that are available which allow USB connection to your PC which may not have programming abilities. Typically extra switches are available so that the ESP01 can be put in programming mode, although you can modify the programmer through a simple solder job to allow it to enter programming mode.
 
+#### Uploading the Static Assets via LittleFS
+There are static files located [here](./ESPMaster/data/) in the `data` folder of ESPMaster which will need to be uploaded. These make up the website that will be accessible on your WiFi so you can update the Split-Flap display.
+
 Open the sketch `ESPMaster.ino` in the `ESPMaster` folder, change your board to "Generic ESP8266 Module", choose the correct COM-port and click Tools->ESP8266 LittleFS Data Upload. This uploads the website onto the ESP01's file system.
 
-#### Change Sketch Values
+**NOTE:** No sketch has been uploaded yet!
+
+#### Updating Settings of the Sketch
 Modify the sketch where it matches the below and update your Wifi Credentials:
 ```c++
 // REPLACE WITH YOUR NETWORK CREDENTIALS
@@ -116,8 +122,8 @@ There are several helper `define` variables to help during debugging/running:
 - **UNIT_CALLS_DISABLE**
   - Use this to disable the communication with the Arduino Nano Units. This will mean you can check code over function for the ESP module.
 
-#### Final Upload
-So far we've only uploaded static fiels to the ESP01. You now need to `Upload` the sketch to the ESP01. Click on Upload and the ESP01 will be upadted with the sketch and you are done. Stick the ESP01 onto the first unit's PCB and navigate to the IP-address the ESP01 is getting assigned from your router.
+#### Sketch Upload
+So far we've only uploaded static files to the ESP01. You now need to `Upload` the sketch to the ESP01. Click on Upload and the ESP01 will be upadted with the sketch and you are done. Stick the ESP01 onto the first unit's PCB and navigate to the IP-address the ESP01 is getting assigned from your router.
 
 ### Common Mistakes
 - If the ESP is not talking to the units correctly, check the UNITSAMOUNT in the `ESPMaster.ino`. The amount of units connected has to match.
