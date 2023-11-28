@@ -28,7 +28,7 @@ Split Flap ESP Master
 //#define UNIT_CALLS_DISABLE  //Disable the call to the units so can just debug the ESP
 
 //The current version of code to display on the UI
-const char* espVersion = "1.1.0-beta";
+const char* espVersion = "1.1.0";
 
 //REPLACE WITH YOUR NETWORK CREDENTIALS
 const char* ssid = "SSID";
