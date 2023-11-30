@@ -25,7 +25,8 @@ label {
 	font-size: 1.2rem;
 }
 
-input[type=submit] {
+input[type=submit],
+a {
 	border: none;
 	color: #FEFCFB;
 	background-color: #F8880E;
@@ -40,9 +41,22 @@ input[type=submit] {
 	transition-duration: 0.4s;
 }
 
-input[type=submit]:hover {
+a {
+	padding: 5px;
+	background-color: #F8880E;
+}
+
+
+
+input[type=submit]:hover,
+a:hover {
 	background-color: #FFB96D;
 	cursor: pointer;
+}
+
+input[type=submit]:last-child,
+a:last-child {
+	margin-right: 0;
 }
 
 input[type=text],
