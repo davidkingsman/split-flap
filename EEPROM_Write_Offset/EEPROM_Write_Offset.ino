@@ -43,7 +43,6 @@ void recvWithEndMarker() {
   char endMarker = '\n';
   char rc;
 
-  // if (Serial.available() > 0) {
   while (Serial.available() > 0 && newData == false) {
     rc = Serial.read();
 

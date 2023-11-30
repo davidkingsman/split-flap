@@ -46,12 +46,12 @@ Options to potentially get boards created for you:
 ### Unit
 Each split-flap unit consists of an Arduino Nano mounted on a custom PCB. It controls a 28BYJ-48 stepper motor via a ULN2003 driver chip. The drum with the flaps is homed with a KY003 hall sensor and a magnet mounted to the drum.
 
-Upload the Arduino sketch `unit.ino` in the unit folder to each unit's arduino nano. Before that set the offset with the `EEPROM_Write_Offset.ino` sketch. 
+Upload the Arduino sketch `Unit.ino` in the unit folder to each unit's arduino nano. Before that set the offset with the `EEPROM_Write_Offset.ino` sketch. 
 
-Inside `unit.ino`, there is a setting for testing the units so that a few letters are cycled through to ensure what is shown is what you expect. At the top of the file once you have opened the project, you will find a line that is commented out:
+Inside `Unit.ino`, there is a setting for testing the units so that a few letters are cycled through to ensure what is shown is what you expect. At the top of the file once you have opened the project, you will find a line that is commented out:
 ```c++
-#define serial 	// uncomment for serial debug communication
-#define test 	//uncomment for Test mode. 
+#define SERIAL_ENABLE   // uncomment for serial debug communication
+#define TEST_ENABLE    	// uncomment for test mode where the unit will cycle a series of test letters. 
 ```
 
 > Note: If you experience any problems uploading the unit sketch, you may have to change your `Processor` to use the old bootloader, called `ATmega328p (Old Bootloader)`.
@@ -61,7 +61,7 @@ Remove the comment characters to help with your testing for the next step of Set
 #### Set Zero Position Offset
 The zero position (or blank flaps position in this case) is attained by driving the stepper to the hall sensor and step a few steps forward. This offset is individual to every unit and needs to be saved to the arduino nano's EEPROM.
 
-A simple sketch has been written to set the offset. Upload the `EEPROM_Write_Offset.ino` sketch and open the serial monitor with 115200 baudrate. It will tell you the current offset and you can enter a new offset. It should be around 100 but yours may vary. You may need to upload the `unit.ino` sketch and see if the offset is correct. Repeat until the blank flap is showing every time the unit homes.
+A simple sketch has been written to set the offset. Upload the `EEPROM_Write_Offset.ino` sketch and open the serial monitor with 115200 baudrate. It will tell you the current offset and you can enter a new offset. It should be around 100 but yours may vary. You may need to upload the `Unit.ino` sketch with the `TEST_ENABLE` flag uncommented and see if the offset is correct. Repeat until the blank flap is showing every time the unit homes.
 
 #### Set Unit Address
 Every units address is set by a DIP switch. They need to be set ascending from zero in binary.
@@ -70,12 +70,12 @@ This is how my 10 units are set, 1 means switch is in the up-position:
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | 0000 | 0001 | 0010 | 0011 | 0100 | 0101 | 0110 | 0111 | 1000 | 1001 |
 
-### ESP01
+### ESP01/ESP8266
 #### Pre-requistites
-To upload the sketch to the ESP01 you need to install a few things to your arduino IDE.
+To upload the sketch to the ESP8266 you need to install a few things to your arduino IDE.
 - Install the ESP8266 board to your Arduino IDE 
 	- https://randomnerdtutorials.com/how-to-install-esp8266-board-arduino-ide/
-- Install the arduino esp8266 littleFS plugin to use the file system of the ESP01, you can follow this tutorial: 
+- Install the arduino ESP8266 littleFS plugin to use the file system of the ESP, you can follow this tutorial: 
 	- https://randomnerdtutorials.com/install-esp8266-nodemcu-littlefs-arduino/
 - Install the following libraries via Library Manager:
   - Arduino_JSON: https://github.com/arduino-libraries/Arduino_JSON
@@ -90,14 +90,14 @@ To upload the sketch to the ESP01 you need to install a few things to your ardui
     	- Downloaded From: https://github.com/me-no-dev/ESPAsyncTCP/archive/master.zip
 
 
-To upload sketches to the ESP01 you can either use an [Arduino Uno](https://create.arduino.cc/projecthub/pratikdesai/how-to-program-esp8266-esp-01-module-with-arduino-uno-598166) or you can buy a dedicated programmer. I highly recommend getting a programmer as it makes uploading programs onto the ESP01 much faster. Examples can be found in the customer reviews of [Amazon](https://www.amazon.co.uk/gp/product/B078J7LDLY/ref=ppx_yo_dt_b_search_asin_title?ie=UTF8&th=1)
+To upload sketches to the ESP8266 you can either use an [Arduino Uno](https://create.arduino.cc/projecthub/pratikdesai/how-to-program-esp8266-esp-01-module-with-arduino-uno-598166) or you can buy a dedicated programmer. I highly recommend getting a programmer as it makes uploading programs onto the ESP8266 much faster. Examples can be found in the customer reviews of [Amazon](https://www.amazon.co.uk/gp/product/B078J7LDLY/ref=ppx_yo_dt_b_search_asin_title?ie=UTF8&th=1)
 
-> Note: Be wary of ESP01 programmers that are available which allow USB connection to your PC which may not have programming abilities. Typically extra switches are available so that the ESP01 can be put in programming mode, although you can modify the programmer through a simple solder job to allow it to enter programming mode.
+> Note: Be wary of ESP8266 programmers that are available which allow USB connection to your PC which may not have programming abilities. Typically extra switches are available so that the ESP8266 can be put in programming mode, although you can modify the programmer through a simple solder job to allow it to enter programming mode.
 
 #### Uploading the Static Assets via LittleFS
 There are static files located [here](./ESPMaster/data/) in the `data` folder of ESPMaster which will need to be uploaded. These make up the website that will be accessible on your WiFi so you can update the Split-Flap display.
 
-Open the sketch `ESPMaster.ino` in the `ESPMaster` folder, change your board to "Generic ESP8266 Module", choose the correct COM-port and click Tools->ESP8266 LittleFS Data Upload. This uploads the website onto the ESP01's file system.
+Open the sketch `ESPMaster.ino` in the `ESPMaster` folder, change your board to "Generic ESP8266 Module", choose the correct COM-port and click Tools->ESP8266 LittleFS Data Upload. This uploads the website onto the ESP8266's file system.
 
 **NOTE:** No sketch has been uploaded yet!
 
@@ -123,9 +123,9 @@ There are several helper `define` variables to help during debugging/running:
   - Use this to disable the communication with the Arduino Nano Units. This will mean you can check code over function for the ESP module.
 
 #### Sketch Upload
-So far we've only uploaded static files to the ESP01. You now need to `Upload` the sketch to the ESP01. Click on Upload and the ESP01 will be upadted with the sketch and you are done. Stick the ESP01 onto the first unit's PCB and navigate to the IP-address the ESP01 is getting assigned from your router.
+So far we've only uploaded static files to the ESP8266. You now need to `Upload` the sketch to the ESP8266. Click on Upload and the ESP8266 will be upadted with the sketch and you are done. Stick the ESP8266 onto the first unit's PCB and navigate to the IP-address the ESP8266 is getting assigned from your router.
 
 ### Common Mistakes
 - If the ESP is not talking to the units correctly, check the UNITSAMOUNT in the `ESPMaster.ino`. The amount of units connected has to match.
-- Ensure you upload the sketch and the LittleFS sketch upload to the ESP01. 
+- Ensure you upload the sketch and the LittleFS sketch upload to the ESP8266. 
 - When the system is powered, your Hall Sensor should only light up when a magnet is nearby. 

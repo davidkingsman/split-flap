@@ -29,6 +29,7 @@ Split Flap ESP Master
 
 //The current version of code to display on the UI
 const char* espVersion = "1.1.0";
+const char* espVersion = "1.2.0";
 
 //REPLACE WITH YOUR NETWORK CREDENTIALS
 const char* ssid = "SSID";
@@ -161,24 +162,23 @@ void setup() {
   server.on("/ota", HTTP_GET, [](AsyncWebServerRequest * request) {
     SerialPrintln("Request to start OTA mode received");
     
-    //Create a HTML to explain OTA
+    //Create HTML page to explain OTA
     IPAddress ip = WiFi.localIP();
     
     String html = "<div style='text-align:center'>";
     html += "<font face='arial'><h1>Split Flap - OTA Update Mode</h1>";
     html += "<p>OTA mode has been started. You can now update your module via WiFI. Open your Arduino IDE and select the new port in \"Tools\" menu and upload the your sketch as normal!<p>";
     html += "<p>Open your Arduino IDE and select the new port in \"Tools\" menu and upload the your sketch as normal!</p>";
-    html += "<p>You can take the system out of this mode by clicking the button below or going to '/reboot'.</p>";
-    html += "<p><a href=\"http://" + ip.toString() + "/reboot\"); ' value='Reboot'>Reboot</a></p>";
+    html += "<p>After you have carried out your update, the system will automatically be rebooted. You can go to the main home page after this time by clicking the button below or going to '/'.</p>";
+    html += "<p>You can take the system out of this mode by clicking the button to reboot below or going to '/reboot'.</p>";
+    html += "<p><a href=\"http://" + ip.toString() + "\")\">Home</a></p>";
+    html += "<p><a href=\"http://" + ip.toString() + "/reboot\")\">Reboot</a></p>";
     html += "</font>";
     html += "</div>";
 
     request->send(200, "text/html", html);
  
     if (isInOtaMode == 0) {
-      //Put in OTA Mode
-      isInOtaMode = 1;
-
       SerialPrintln("Setting OTA Hostname");
       ArduinoOTA.setHostname("split-flap-ota");
 
@@ -192,18 +192,17 @@ void setup() {
       delay(100);
     
       ArduinoOTA.onStart([]() {
+        LittleFS.end();
         if (ArduinoOTA.getCommand() == U_FLASH) {
           SerialPrintln("Start updating sketch");
         } 
-        else { //U_FS
+        else {
           SerialPrintln("Start updating filesystem");
         }  
       });
       
       ArduinoOTA.onEnd([]() {
         SerialPrintln("Finished OTA Update - Rebooting");
-
-        delay(500);
         isPendingReboot = true;
       });
       
@@ -230,6 +229,9 @@ void setup() {
           SerialPrintln("OTA End Failed");
         }
       });
+      
+      //Put in OTA Mode
+      isInOtaMode = 1;
     }
     else {
       SerialPrintln("Already in OTA Mode");
@@ -240,7 +242,19 @@ void setup() {
   server.on("/reboot", HTTP_GET, [](AsyncWebServerRequest * request) {
     SerialPrintln("Request to Reboot Received");
     
-    request->send(200, "text/plain", "Starting Reboot...");
+    //Create HTML page to explain the system is rebooting
+    IPAddress ip = WiFi.localIP();
+    
+    String html = "<div style='text-align:center'>";
+    html += "<font face='arial'><h1>Split Flap - Rebooting</h1>";
+    html += "<p>Reboot is pending now...<p>";
+    html += "<p>This can take anywhere between 10-20 seconds<p>";
+    html += "<p>You can go to the main home page after this time by clicking the button below or going to '/'.</p>";
+    html += "<p><a href=\"http://" + ip.toString() + "\">Home</a></p>";
+    html += "</font>";
+    html += "</div>";
+    
+    request->send(200, "text/html", html);
     isPendingReboot = 1;
   });
 
@@ -387,6 +401,7 @@ void loop() {
   //If System is in OTA, try handle!
   if(isInOtaMode == 1) {
     ArduinoOTA.handle();
+    delay(1);
   }
 #endif
 
