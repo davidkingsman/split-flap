@@ -2,8 +2,8 @@
   Split Flap Arduino Nano Unit
 *********/
 
-//#define serial // uncomment for serial debug communication
-//#define test //uncomment for Test mode. Rotates through a few character to make sure unit is working. These characters should be displayed in the correct order: " ", "Z", "A", "U", "N", "?", "0", "1", "2", "9"
+//#define SERIAL_ENABLE // uncomment for serial debug communication
+//#define TEST_ENABLE   // uncomment for Test mode. Rotates through a few character to make sure unit is working. These characters should be displayed in the correct order: " ", "Z", "A", "U", "N", "?", "0", "1", "2", "9"
 
 #include <Arduino.h>
 #include <Wire.h>
@@ -66,7 +66,7 @@ void setup() {
 
   i2cAddress = getaddress(); //get I2C Address and save in variable
 
-#ifdef serial
+#ifdef SERIAL_ENABLE
   //initialize serial
   Serial.begin(BAUDRATE);
   Serial.println("starting unit");
@@ -83,7 +83,7 @@ void setup() {
   calibrate(true); //home stepper after startup
 
   //test calibration settings
-#ifdef test
+#ifdef TEST_ENABLE
   int calLetters[10] = {0, 26, 1, 21, 14, 43, 30, 31, 32, 39};
   for (int i = 0; i < 10; i++) {
     int currentCalLetter = calLetters[i];
@@ -101,11 +101,11 @@ void loop() {
     ADCSRA = 0;
     set_sleep_mode (SLEEP_MODE_PWR_DOWN);
     sleep_enable();
-#ifdef serial
+#ifdef SERIAL_ENABLE
     digitalWrite (LED_BUILTIN, LOW); // shuts off LED when starting to sleep, for debugging
 #endif
     sleep_cpu ();
-#ifdef serial
+#ifdef SERIAL_ENABLE
     digitalWrite (LED_BUILTIN, HIGH); // turns on LED when waking up, for debugging
 #endif
     sleep_disable();
@@ -123,7 +123,7 @@ void loop() {
   if (displayedLetter != receivedNumber)
   {
     /*
-      #ifdef serial
+      #ifdef SERIAL_ENABLE
       Serial.print("Value over serial received: ");
       Serial.print(receivedNumber);
       Serial.print(" Letter: ");
@@ -146,7 +146,7 @@ void rotateToLetter(int toLetter) {
     int posCurrentLetter = -1;
     posCurrentLetter = displayedLetter;
     //int amountLetters = sizeof(letters) / sizeof(String);
-#ifdef serial
+#ifdef SERIAL_ENABLE
     Serial.print("go to letter: ");
     Serial.println(letters[toLetter]);
 #endif
@@ -154,7 +154,7 @@ void rotateToLetter(int toLetter) {
     if (posLetter > -1) { //check if letter exists
       //check if letter is on higher index, then no full rotaion is needed
       if (posLetter >= posCurrentLetter) {
-#ifdef serial
+#ifdef SERIAL_ENABLE
         Serial.println("direct");
 #endif
         //go directly to next letter, get steps from current letter to target letter
@@ -175,7 +175,7 @@ void rotateToLetter(int toLetter) {
       }
       else {
         //full rotation is needed, good time for a calibration
-#ifdef serial
+#ifdef SERIAL_ENABLE
         Serial.println("full rotation incl. calibration");
 #endif
         calibrate(false); //calibrate revolver and do not stop motor
@@ -199,7 +199,7 @@ void rotateToLetter(int toLetter) {
       stopMotor();
     }
     else {
-#ifdef serial
+#ifdef SERIAL_ENABLE
       Serial.println("letter unknown, go to space");
 #endif
       desiredLetter = 0;
@@ -221,7 +221,7 @@ void receiveLetter(int numBytes) {
 void requestEvent() {
   Wire.write(currentlyrotating); //send unit status to master
   /*
-    #ifdef serial
+    #ifdef SERIAL_ENABLE
     Serial.print("Status ");
     Serial.print(currentlyrotating);
     Serial.print(" sent to master");
@@ -239,7 +239,7 @@ int getaddress() {
 //gets magnet sensor offset from EEPROM in steps
 void getOffset() {
   EEPROM.get(eeAddress, calOffset);
-#ifdef serial
+#ifdef SERIAL_ENABLE
   Serial.print("CalOffset from EEPROM: ");
   Serial.print(calOffset);
   Serial.println();
@@ -248,7 +248,7 @@ void getOffset() {
 
 //doing a calibration of the revolver using the hall sensor
 int calibrate(bool initialCalibration) {
-#ifdef serial
+#ifdef SERIAL_ENABLE
   Serial.println("calibrate revolver");
 #endif
   currentlyrotating = 1; //set active state to active
@@ -272,7 +272,7 @@ int calibrate(bool initialCalibration) {
       stepper.step(ROTATIONDIRECTION * calOffset);
       displayedLetter = 0;
       missedSteps = 0;
-#ifdef serial
+#ifdef SERIAL_ENABLE
       Serial.println("revolver calibrated");
 #endif
       //Only stop motor for initial calibration
@@ -286,7 +286,7 @@ int calibrate(bool initialCalibration) {
       displayedLetter = 0;
       desiredLetter = 0;
       reachedMarker = true;
-#ifdef serial
+#ifdef SERIAL_ENABLE
       Serial.println("calibration revolver failed");
 #endif
       stopMotor();
@@ -308,7 +308,7 @@ void stopMotor() {
   digitalWrite(STEPPERPIN2, LOW);
   digitalWrite(STEPPERPIN3, LOW);
   digitalWrite(STEPPERPIN4, LOW);
-#ifdef serial
+#ifdef SERIAL_ENABLE
   Serial.println("Motor Stop");
 #endif
   currentlyrotating = 0; //set active state to not active
@@ -316,7 +316,7 @@ void stopMotor() {
 }
 
 void startMotor() {
-#ifdef serial
+#ifdef SERIAL_ENABLE
   Serial.println("Motor Start");
 #endif
   currentlyrotating = 1; //set active state to active
