@@ -16,6 +16,15 @@ String centerString(String message) {
   return message;
 }
 
+String createRepeatingString(char character) {
+  String newMessage = "";
+  for (int i = 0; i < UNITSAMOUNT; i++) {
+    newMessage.concat(character);
+  }
+
+  return newMessage;  
+}
+
 //Aligns string on right side of array and fills empty chars with spaces
 String rightString(String message) {
   int rightSpaceAmount = (UNITSAMOUNT - message.length());

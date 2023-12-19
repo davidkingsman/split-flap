@@ -28,7 +28,7 @@ Split Flap ESP Master
 //#define UNIT_CALLS_DISABLE  //Disable the call to the units so can just debug the ESP
 
 //The current version of code to display on the UI
-const char* espVersion = "1.2.0";
+const char* espVersion = "1.3.0";
 
 //REPLACE WITH YOUR NETWORK CREDENTIALS
 const char* ssid = "SSID";
@@ -103,6 +103,9 @@ bool isInOtaMode = 0;
 
 //Denotes the system is pending a restart
 bool isPendingReboot = 0;
+
+//Denotes the system needs calibrating
+bool isPendingUnitsReset = 0;
 
 //Used for display on the UI
 String lastReceivedMessageDateTime;
@@ -256,6 +259,15 @@ void setup() {
     request->send(200, "text/html", html);
     isPendingReboot = 1;
   });
+  
+  server.on("/reset-units", HTTP_GET, [](AsyncWebServerRequest * request) {
+    SerialPrintln("Request to Reset Units Received");
+    
+    //This will be picked up in the loop
+    isPendingUnitsReset = 1;
+    
+    request->redirect("/?reset-units=true");
+  });
 
   server.on("/scheduled-message/remove", HTTP_DELETE, [](AsyncWebServerRequest * request) {
     SerialPrintln("Request to Remove Scheduled Message Received");
@@ -394,6 +406,36 @@ void loop() {
     SerialPrintln("Rebooting Now...");
     delay(200);
     ESP.restart();
+  }
+
+  if (isPendingUnitsReset) {
+    SerialPrintln("Reseting Units now...");
+
+    //Set the device mode to "Text" so can do a reset
+    previousDeviceMode = currentDeviceMode;
+    currentDeviceMode = DEVICE_MODE_TEXT;
+
+    //Blank out the message
+    String blankOutText1 = createRepeatingString('-');
+    showText(blankOutText1);
+    delay(200);
+
+    //Do just enough to do a full iteration which triggers the re-calibration
+    String blankOutText2 = createRepeatingString('.');
+    showText(blankOutText2);
+
+    //Put back to the mode we was just in
+    currentDeviceMode = previousDeviceMode;
+
+    //Try re-display the last message now we've reset if we was in text mode
+    if (currentDeviceMode == DEVICE_MODE_TEXT) {
+      showText(lastWrittenText);
+    }
+
+    //We did a reset!
+    isPendingUnitsReset = 0;
+
+    SerialPrintln("Done Units Reset!");
   }
   
 #ifdef OTA_ENABLE
