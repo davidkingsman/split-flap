@@ -114,9 +114,10 @@ void setup() {
   //Serial port for debugging purposes
 #ifdef SERIAL_ENABLE
   Serial.begin(BAUDRATE);
+#endif
+
   SerialPrintln("#######################################################");
   SerialPrintln("Master module starting...");
-#endif
 
 #ifdef OTA_ENABLE
   SerialPrintln("OTA Enabled...");
@@ -266,7 +267,7 @@ void setup() {
     //This will be picked up in the loop
     isPendingUnitsReset = 1;
     
-    request->redirect("/?reset-units=true");
+    request->redirect("/?is-resetting-units=true");
   });
 
   server.on("/scheduled-message/remove", HTTP_DELETE, [](AsyncWebServerRequest * request) {
@@ -418,7 +419,7 @@ void loop() {
     //Blank out the message
     String blankOutText1 = createRepeatingString('-');
     showText(blankOutText1);
-    delay(200);
+    delay(2000);
 
     //Do just enough to do a full iteration which triggers the re-calibration
     String blankOutText2 = createRepeatingString('.');

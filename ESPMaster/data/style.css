@@ -103,7 +103,15 @@ input[type=datetime-local] {
 }
 
 .content {
-	padding: 25px;
+	padding: 15px 25px 25px 25px;
+}
+
+.banner-message {
+	max-width: 800px;
+	margin: 0 auto;
+	background-color: #F8880E;
+	padding: 10px 10px;
+	margin-bottom: 15px;
 }
 
 .card-grid {

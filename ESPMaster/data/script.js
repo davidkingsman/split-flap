@@ -41,10 +41,26 @@ form.onsubmit = function () {
 }
 
 // Retrieve current Split-Flap settings when the page loads/refreshes
-window.addEventListener('load', getSystemSettings);
+window.addEventListener('load', loadPage);
 
 // Request and retrieve settings from ESP-01s filesystem
-function getSystemSettings() {
+function loadPage() {
+	const urlParams = new URLSearchParams(location.search);
+	const isResetting = urlParams.get('is-resetting-units');
+	if (isResetting !== undefined && isResetting == "true") {
+		var bannerMessageElement = document.getElementById('bannerMessage'); 
+		bannerMessageElement.innerHTML = `
+			Display is now resetting/re-calibrating. It should only take a few seconds.
+			<br>
+			It will display different characters in order to carry this out and then go back to the last thing being displayed.
+		`;
+
+		bannerMessageElement.style = "display: block;";
+		setTimeout(function() {
+			bannerMessageElement.style = "display: none;";
+		}, 5000);
+	}
+
 	if (localDevelopment) {
 		setSpeed("80");
 		setSavedMode("text");
