@@ -1,0 +1,36 @@
+name: 'Build Arduino Unit Sketch'
+
+on:
+  pull_request:    
+    branches:
+      - master
+    paths:
+      - 'Unit/**'
+  schedule:
+    - cron: '0 12 1 * *'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  compile-unit-sketch:
+    name: "Build Arduino Unit Sketch"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Compile sketch
+        uses: arduino/compile-sketches@v1
+        with:
+          fqbn: "arduino:avr:nano"
+          sketch-paths: |
+            - ./Unit
+          libraries: |
+            - name: Stepper
+              version: 1.1.3
+          cli-compile-flags: |
+            - --warnings
+            - "none"
