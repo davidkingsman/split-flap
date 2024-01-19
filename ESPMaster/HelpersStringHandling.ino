@@ -1,13 +1,13 @@
 //Aligns string on center of array and fills empty chars with spaces
 String centerString(String message) {
   //Takes care of the left side
-  int leftSpaceAmount = (UNITSAMOUNT -  message.length()) / 2;
-  for (int i = 0; i < leftSpaceAmount; i++) {
+  int leftSpaceAmount = (UNITS_AMOUNT -  message.length()) / 2;
+  for (int spaceIndex = 0; spaceIndex < leftSpaceAmount; spaceIndex++) {
     message = " " + message;
   }
 
   //Take care of the right side
-  for(int i = message.length(); i < UNITSAMOUNT; i++) {
+  for(int spaceIndex = message.length(); spaceIndex < UNITS_AMOUNT; spaceIndex++) {
     message = message + " ";
   }
 
@@ -18,7 +18,7 @@ String centerString(String message) {
 
 String createRepeatingString(char character) {
   String newMessage = "";
-  for (int i = 0; i < UNITSAMOUNT; i++) {
+  for (int unitIndex = 0; unitIndex < UNITS_AMOUNT; unitIndex++) {
     newMessage.concat(character);
   }
 
@@ -27,8 +27,8 @@ String createRepeatingString(char character) {
 
 //Aligns string on right side of array and fills empty chars with spaces
 String rightString(String message) {
-  int rightSpaceAmount = (UNITSAMOUNT - message.length());
-  for (int i = 0; i < rightSpaceAmount; i++) {
+  int rightSpaceAmount = (UNITS_AMOUNT - message.length());
+  for (int spaceIndex = 0; spaceIndex < rightSpaceAmount; spaceIndex++) {
     message = " " + message;
   }
 
@@ -39,8 +39,8 @@ String rightString(String message) {
 
 //Aligns string on left side of array and fills empty chars with spaces
 String leftString(String message) {
-  int leftSpaceAmount = (UNITSAMOUNT - message.length());
-  for (int i = 0; i < leftSpaceAmount; i++) {
+  int leftSpaceAmount = (UNITS_AMOUNT - message.length());
+  for (int spaceIndex = 0; spaceIndex < leftSpaceAmount; spaceIndex++) {
     message = message + " ";
   }
 
@@ -59,7 +59,7 @@ String cleanString(String message) {
 int convertSpeed(String flapSpeed) {
   int flapSpeedInt;
   flapSpeedInt = flapSpeed.toInt();
-  flapSpeedInt = map(flapSpeedInt, 1, 100, MINSPEED, MAXSPEED);
+  flapSpeedInt = map(flapSpeedInt, 1, 100, MIN_SPEED, MAX_SPEED);
   
   return flapSpeedInt;
 }
@@ -135,7 +135,7 @@ LinkedList<String> processSentenceToLines(String sentence) {
       int wordLength = indexOfFirstNewline == -1 ? wordItem.length() : indexOfFirstNewline;
 
       //If we cannot fit everything on the same line, start a new line
-      if (inProgressLine != "" && inProgressLine.length() + wordLength + 1 > UNITSAMOUNT)
+      if (inProgressLine != "" && inProgressLine.length() + wordLength + 1 > UNITS_AMOUNT)
       {
           lines.add(inProgressLine);
           inProgressLine = "";
@@ -162,7 +162,7 @@ LinkedList<String> processSentenceToLines(String sentence) {
       else
       {
         //If we need to break up the word as its too long, then we need to add a "-"
-        if (inProgressLine.length() == UNITSAMOUNT - 1 && letterIndex < currentWordLength - 1)
+        if (inProgressLine.length() == UNITS_AMOUNT - 1 && letterIndex < currentWordLength - 1)
         {
           inProgressLine = inProgressLine + "-";
           lines.add(inProgressLine);
@@ -171,7 +171,7 @@ LinkedList<String> processSentenceToLines(String sentence) {
 
         //Business as usual, add the letter onto the in progress line
         inProgressLine = inProgressLine + wordItemLetter;
-        if (inProgressLine.length() == UNITSAMOUNT)
+        if (inProgressLine.length() == UNITS_AMOUNT)
         {  
           lines.add(inProgressLine);
           inProgressLine = "";
@@ -191,4 +191,15 @@ LinkedList<String> processSentenceToLines(String sentence) {
   }
 
   return lines;
+}
+
+//Used for ensuring a string is a number
+bool isNumber(String str) {
+  char* endPtr;
+
+  //10 specifies base 10 (decimal)
+  strtol(str.c_str(), &endPtr, 10);  
+
+  //Check if the conversion reached the end of the string
+  return (*endPtr == '\0');
 }

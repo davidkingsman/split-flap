@@ -39,8 +39,8 @@ jobs:
           sketch-paths: |
             - ./ESPMaster
           libraries: |
-            - name: Arduino_JSON
-              version: 0.2.0
+            - name: ArduinoJson
+              version: 7.0.1
             - name: ArduinoOTA
               version: 1.0.12
             - name: NTPClient
@@ -49,6 +49,8 @@ jobs:
               version: 0.8.3
             - name: LinkedList
               version: 1.3.3
+            - name: WiFiManager
+              version: 2.0.16-rc.2
           cli-compile-flags: |
             - --warnings
             - "none"

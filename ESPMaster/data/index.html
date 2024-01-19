@@ -14,120 +14,147 @@
 		<h4 class="float-right" style="text-align: right;">
 			Version: <label id="labelVersion">N/A</label>
 			<br>
-			Flaps: <label id="labelUnits">N/A</label>
+			Units: <label id="labelUnits">N/A</label>
 			<br>
-			Last Received Time: <label id="labelLastMessageReceived">N/A</label>
+			Last Received: <label id="labelLastMessageReceived">N/A</label>
 		</h4>
 	</div>
 	<div class="content">
-		<div id="bannerMessage" class="banner-message" style="display: none;"></div>
+		<div id="initialLoading" class="lds-facebook"><div></div><div></div><div></div></div>
 
-		<form action="/" method="post" id="form">
-			<div class="card-grid">
-				<div class="card">
-					<p class="card-title">General</p>
-					<p style="font-size: 1.2rem;">Text Alignment</p>
-					<div class="alignment-inputs">
-						<p>
-							<input type="radio" id="radioLeft" name="alignment" autocomplete="off" value="left" />
-							<label for="radioLeft">Left</label>
-						</p>
-						<p>
-							<input type="radio" id="radioCenter" name="alignment" autocomplete="off" value="center" />
-							<label for="radioCenter">Center</label>
-						</p>
-						<p>
-							<input type="radio" id="radioRight" name="alignment" autocomplete="off" value="right" />
-							<label for="radioRight">Right</label>
-						</p>
-					</div>
+		<div id="loadedContent" class="hidden">
+			<div id="bannerMessage" class="banner-message hidden"></div>
 
-					<div style="margin-top: 2em;">
-						<label for="rangeFlapSpeed">Flap Speed</label>
-						<p class="switch" />
-
-						<input type="range" oninput="updateSpeedSlider(this)" id="rangeFlapSpeed" name="flapSpeed"
-							min="1" max="100" step="1" value="80" class="slider" />
-						<p class="state">Speed:
-							<span id="rangeFlapSpeedValue" />80 &percnt;
-						</p>
-					</div>
-				</div>
-
-				<div class="card">
-					<p class="card-title">Modes</p>
-					<p>
-						<input type="radio" id="modeClock" name="deviceMode" value="clock" />
-						<label for="modeClock">Clock Mode</label>
-					</p>
-
-					<p>
-						<input type="radio" id="modeDate" name="deviceMode" value="date" />
-						<label for="modeDate">Date Mode</label>
-					</p>
-
-					<p>
-						<input type="radio" id="modeText" name="deviceMode" value="text" />
-						<label for="modeText">Text Mode</label>
-					</p>
-
-					<p>
-						<label for="inputText">Text</label>
-						<input type="text" id="inputText" name="inputText" onkeyup="updateCharacterCount()" autocomplete="off" maxlength="75" />
-						<span class="character-count">
-							<label id="labelCharacterCount">0</label> Character(s)
-						</span>						
-						<span>
-							<input type="button" value="+ Newline" onclick="addNewline()"/>
-						</span>
-					</p>
-
-					<p>
-						<label for="scheduledDateTime">Schedule Message?</label>
-						<input type="checkbox" id="inputCheckboxScheduleEnabled" name="scheduleEnabled"
-							onchange="showHideScheduledMessageInput()" />
-						<br>
-						<input type="datetime-local" style="display: none;" id="inputScheduledDateTime"
-							name="scheduleDateTime">
-						<input type="hidden" id="inputHiddenScheduledDateTimeUnix" name="scheduledDateTimeUnix" />
-					</p>
-
-					<p>
-						<div id="containerSubmit">
-							<input type="submit" value="Submit" />
+			<form action="/" method="post" id="form">
+				<div class="card-grid">
+					<div class="card">
+						<p class="card-title">General</p>
+						<p style="font-size: 1.2rem;">Text Alignment</p>
+						<div class="alignment-inputs">
+							<p>
+								<input type="radio" id="radioLeft" name="alignment" autocomplete="off" value="left" />
+								<label for="radioLeft">Left</label>
+							</p>
+							<p>
+								<input type="radio" id="radioCenter" name="alignment" autocomplete="off" value="center" />
+								<label for="radioCenter">Center</label>
+							</p>
+							<p>
+								<input type="radio" id="radioRight" name="alignment" autocomplete="off" value="right" />
+								<label for="radioRight">Right</label>
+							</p>
 						</div>
-					</p>
+
+						<div style="margin-top: 2em;">
+							<label for="rangeFlapSpeed">Flap Speed</label>
+							<p class="switch" />
+
+							<input type="range" oninput="updateSpeedSlider(this)" id="rangeFlapSpeed" name="flapSpeed"
+								min="1" max="100" step="1" value="80" class="slider" />
+							<p class="state">Speed:
+								<span id="rangeFlapSpeedValue" />80 &percnt;
+							</p>
+						</div>
+					</div>
+
+					<div class="card">
+						<p class="card-title">Modes</p>
+						<p>
+							<input onchange="setDeviceModeTab(this.value)" type="radio" id="modeClock" name="deviceMode" value="clock" />
+							<label for="modeClock">Clock Mode</label>
+						</p>
+
+						<p>
+							<input onchange="setDeviceModeTab(this.value)" type="radio" id="modeDate" name="deviceMode" value="date" />
+							<label for="modeDate">Date Mode</label>
+						</p>
+
+						<p>
+							<input onchange="setDeviceModeTab(this.value)" type="radio" id="modeCountdown" name="deviceMode" value="countdown" />
+							<label for="modeCountdown">Countdown Mode</label>
+						</p>
+
+						<p>
+							<input onchange="setDeviceModeTab(this.value)" type="radio" id="modeText" name="deviceMode" value="text" />
+							<label for="modeText">Text Mode</label>
+						</p>
+						
+						<div id="tab-text" class="tab">
+							<p>
+								<label for="inputText"></label>
+								<input type="text" id="inputText" name="inputText" onkeyup="updateCharacterCount()" autocomplete="off" maxlength="75" />
+								<span class="count">
+									<label id="labelCharacterCount">0</label> Character(s)
+								</span>
+								<span class="count">
+									<label id="labelLineCount">1</label> line(s)
+								</span>
+								<span>
+									<input type="button" value="+ Newline" onclick="addNewline()"/>
+								</span>
+							</p>
+
+							<p>
+								<label for="scheduledDateTime">Schedule Message?</label>
+								<input type="checkbox" id="inputCheckboxScheduleEnabled" name="scheduleEnabled"	onchange="showHideScheduledMessageInput()" />
+								<br>
+								<input type="datetime-local" class="hidden" id="inputScheduledDateTime"	name="scheduleDateTime">
+								<input type="hidden" id="inputHiddenScheduledDateTimeUnix" name="scheduledDateTimeUnix" value="0" />
+							</p>				
+						</div>
+
+						<div id="tab-countdown" class="tab hidden">
+							<p>
+								<label for="inputCountdownDateTime">Countdown End Date</label>
+								<br>
+								<input type="date" id="inputCountdownDateTime" name="countdownDateTime">
+								<input type="hidden" id="inputHiddenCountdownDateTimeUnix" name="countdownDateTimeUnix" value="0" />
+							</p>
+						</div>
+		
+						<p>
+							<div id="containerSubmit">
+								<input type="submit" value="Submit" />
+							</div>
+						</p>		
+					</div>
 				</div>
-			</div>
-		</form>
+			</form>
 
-		<div class="card-grid">
-			<div class="card card-full">
-				<p class="card-title">Actions</p>
-
-				<p>
-					<a href="/ota">OTA Update</a>
-					<a href="/reboot">Reboot</a>
-				</p>
-				<p>
-					<a href="/reset-units">Reset Unit Calibration</a>
-				</p>
-			</div>
-		</div>
-
-		<form>
 			<div class="card-grid">
 				<div class="card card-full">
-					<p class="card-title">Scheduled Messages (<span id="spanScheduledMessageCount">0</span>)</p>
+					<p class="card-title">Actions</p>
 
-					<div id="containerScheduledMessages" class="scheduled-messages">
+					<div class="actions">
+						<a id="linkActionOtaUpdate" href="/ota" onclick="return confirm('Are you sure you want to put device in OTA mode?')">
+							OTA Update
+						</a>
+						<a id="linkActionReboot" href="/reboot" onclick="return confirm('Are you sure you want reboot device?')">
+							Reboot
+						</a>
+						<a id="linkActionUnitCalibration" href="/reset-units" onclick="return confirm('Are you sure you want to Reset Units?')">
+							Reset Unit Calibration
+						</a>
+						<a id="linkActionResetWifi" href="/reset-wifi" onclick="return confirm('Are you sure you want to Reset WiFi settings?')">
+							Reset WiFi
+						</a>
 					</div>
 				</div>
 			</div>
-		</form>
+
+			<form>
+				<div class="card-grid">
+					<div class="card card-full">
+						<p class="card-title">Scheduled Messages (<span id="spanScheduledMessageCount">0</span>)</p>
+
+						<div id="containerScheduledMessages" class="scheduled-messages">
+						</div>
+					</div>
+				</div>
+			</form>
+		</div>
 	</div>
-	<script src="script.js" />
-	</script>
+	<script src="script.js" /></script>
 </body>
 
 </html>

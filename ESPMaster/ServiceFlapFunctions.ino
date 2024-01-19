@@ -1,9 +1,16 @@
 //Shows a new message on the display
 void showText(String message) {  
-  if (lastWrittenText != message) { 
+  showText(message, 0);
+}
+
+void showText(String message, int delayMillis) {  
+  if (lastWrittenText != message || alignmentUpdated) { 
+    String messageDisplay = message == "" ? "<Blank>" : message;
+    String alignmentUpdatedDisplay = alignmentUpdated ? "Yes" : "No";
+
     SerialPrintln("Showing new Message");
-    SerialPrintln("Last Written Text: " + lastWrittenText);
-    SerialPrintln("New Message: " + message);
+    SerialPrintln("New Message: " + messageDisplay);
+    SerialPrintln("Alignment Updated: " + alignmentUpdatedDisplay);
   
     LinkedList<String> messageLines = processSentenceToLines(message);
 
@@ -26,20 +33,22 @@ void showText(String message) {
       }  
     }
     else {
-      SerialPrint("Showing a simple message: ");
-      SerialPrintln(message);
-  
+      SerialPrintln("Showing a simple message: " + message);
+      
       showMessage(message, convertSpeed(flapSpeed));
     }  
 
     //If the device wasn't previously in text mode, delay for a short time so can read!
-    if (currentDeviceMode != previousDeviceMode) {
-      delay(3000);
-      currentDeviceMode = previousDeviceMode;
+    if (delayMillis != 0) {
+      SerialPrintln("Pausing for a small duration. Delay: " + String(delayMillis));
+      delay(delayMillis);
     }
 
     //Save what we last did
     lastWrittenText = message;
+
+    //Alignment definitely has not changed now
+    alignmentUpdated = false;
     
     SerialPrintln("Done showing message");
   }
@@ -47,50 +56,46 @@ void showText(String message) {
 
 //Pushes message to units
 void showMessage(String message, int flapSpeed) {
-  SerialPrint("-- Show Message Received for: \"");
-  SerialPrint(message);
-  SerialPrintln("\"");
-
   //Format string per alignment choice
   if (alignment == ALIGNMENT_MODE_LEFT) {
     message = leftString(message);
-  } else if (alignment == ALIGNMENT_MODE_RIGHT) {
+  } 
+  else if (alignment == ALIGNMENT_MODE_RIGHT) {
     message = rightString(message);
-  } else if (alignment == ALIGNMENT_MODE_CENTER) {
+  } 
+  else if (alignment == ALIGNMENT_MODE_CENTER) {
     message = centerString(message);
   }
 
-  SerialPrint("-- Aligned Message: \"");
+  SerialPrint("Showing Aligned Message: \"");
   SerialPrint(message);
   SerialPrintln("\"");
 
-#ifdef UNIT_CALLS_DISABLE
+#if UNIT_CALLS_DISABLE == true
   SerialPrintln("Unit Calls are disabled for debugging. Will delay to simulate calls...");
   delay(2000);
-#endif
-
-#ifndef UNIT_CALLS_DISABLE
+#else
   //Wait while display is still moving
+  SerialPrintln("Unit calls are enabled. Will display message");
   while (isDisplayMoving()) {
     SerialPrintln("Waiting for display to stop");
     delay(500);
   }
 
-  SerialPrintln(message);
-  for (int i = 0; i < UNITSAMOUNT; i++) {
-    char currentLetter = message[i];
+  for (int unitIndex = 0; unitIndex < UNITS_AMOUNT; unitIndex++) {
+    char currentLetter = message[unitIndex];
     int currentLetterPosition = translateLettertoInt(currentLetter);
     
     SerialPrint("Unit Nr.: ");
-    SerialPrint(i);
+    SerialPrint(unitIndex);
     SerialPrint(" Letter: ");
-    SerialPrint(message[i]);
+    SerialPrint(message[unitIndex]);
     SerialPrint(" Letter position: ");
     SerialPrintln(currentLetterPosition);
 
     //only write to unit if char exists in letter array
     if (currentLetterPosition != -1) {
-      writeToUnit(i, currentLetterPosition, flapSpeed);
+      writeToUnit(unitIndex, currentLetterPosition, flapSpeed);
     }
   }
 
@@ -104,11 +109,12 @@ void showMessage(String message, int flapSpeed) {
 
 //Translates char to letter position
 int translateLettertoInt(char letterchar) {
-  for (int i = 0; i < FLAPAMOUNT; i++) {
-    if (letterchar == letters[i]) {
-      return i;
+  for (int flapIndex = 0; flapIndex < FLAP_AMOUNT; flapIndex++) {
+    if (letterchar == letters[flapIndex]) {
+      return flapIndex;
     }
   }
+
   return -1;
 }
 
@@ -119,11 +125,11 @@ void writeToUnit(int address, int letter, int flapSpeed) {
   Wire.beginTransmission(address);
 
   //Write values to send to slave in buffer
-  for (unsigned int i = 0; i < sizeof sendArray / sizeof sendArray[0]; i++) {
+  for (unsigned int index = 0; index < sizeof sendArray / sizeof sendArray[0]; index++) {
     SerialPrint("sendArray: ");
-    SerialPrintln(sendArray[i]);
+    SerialPrintln(sendArray[index]);
 
-    Wire.write(sendArray[i]);
+    Wire.write(sendArray[index]);
   }
   Wire.endTransmission(); //send values to unit
 }
@@ -131,14 +137,14 @@ void writeToUnit(int address, int letter, int flapSpeed) {
 //Checks if unit in display is currently moving
 bool isDisplayMoving() {
   //Request all units moving state and write to array
-  for (int i = 0; i < UNITSAMOUNT; i++) {
-    displayState[i] = checkIfMoving(i);
-    if (displayState[i] == 1) {
+  for (int unitIndex = 0; unitIndex < UNITS_AMOUNT; unitIndex++) {
+    displayState[unitIndex] = checkIfMoving(unitIndex);
+    if (displayState[unitIndex] == 1) {
       SerialPrintln("A unit in the display is busy");
       return true;
     } 
     //If unit is not available through i2c
-    else if (displayState[i] == -1) {
+    else if (displayState[unitIndex] == -1) {
       SerialPrintln("A unit in the display is sleeping");
       return true;
     }
@@ -151,7 +157,7 @@ bool isDisplayMoving() {
 //Checks if single unit is moving
 int checkIfMoving(int address) {
   int active;
-  Wire.requestFrom(address, ANSWERSIZE, 1);
+  Wire.requestFrom(address, ANSWER_SIZE, 1);
   active = Wire.read();
 
   SerialPrint(address);

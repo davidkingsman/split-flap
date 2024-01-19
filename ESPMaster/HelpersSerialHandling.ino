@@ -2,21 +2,21 @@
 //definition checks with every call
 template <typename T>
 void SerialPrint(T value) {
-#ifdef SERIAL_ENABLE
+#if SERIAL_ENABLE == true
     Serial.print(value);
 #endif
 }
 
 template <typename T>
 void SerialPrintf(const char* message, T value) {
-#ifdef SERIAL_ENABLE
+#if SERIAL_ENABLE == true
     Serial.printf(message, value);
 #endif
 }
 
 template <typename T>
 void SerialPrintln(T value) {
-#ifdef SERIAL_ENABLE
+#if SERIAL_ENABLE == true
     Serial.println(value);
 #endif
 }

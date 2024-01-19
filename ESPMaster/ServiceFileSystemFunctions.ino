@@ -10,37 +10,24 @@ void initialiseFileSystem() {
 //Load variables that are saved to the file system
 void loadValuesFromFileSystem() {
   //Load values saved in LittleFS
+  countdownToDateUnix = readFile(LittleFS, countdownPath, "0");
   alignment = readFile(LittleFS, alignmentPath, ALIGNMENT_MODE_LEFT);
   flapSpeed = readFile(LittleFS, flapSpeedPath, "80");
-  currentDeviceMode = readFile(LittleFS, deviceModePath, DEVICE_MODE_TEXT);
-  previousDeviceMode = currentDeviceMode;
+  deviceMode = readFile(LittleFS, deviceModePath, DEVICE_MODE_TEXT);
 
-  SerialPrintln("Alignment: " + alignment);
-  SerialPrintln("Flap Speed: " + flapSpeed);
-  SerialPrintln("Device Mode: " + currentDeviceMode);
-}
-
-//Gets all the currently stored calues from memory in a JSON object
-String getCurrentSettingValues() {
-  JSONVar values;
-
-  values["alignment"] = alignment;
-  values["flapSpeed"] = flapSpeed;
-  values["deviceMode"] = currentDeviceMode;
-  values["version"] = espVersion;
-  values["unitCount"] = UNITSAMOUNT;
-  values["lastTimeReceivedMessage"] = lastReceivedMessageDateTime;
-  values["lastInputMessage"] = inputText;
-
-  for(int scheduledMessageIndex = 0; scheduledMessageIndex < scheduledMessages.size(); scheduledMessageIndex++) {
-    ScheduledMessage scheduledMessage = scheduledMessages[scheduledMessageIndex];
-    
-    values["scheduledMessages"][scheduledMessageIndex]["scheduledDateTimeMillis"] = scheduledMessage.ScheduledDateTimeMillis;
-    values["scheduledMessages"][scheduledMessageIndex]["message"] = scheduledMessage.Message;
+  String scheduledMessagesJson = readFile(LittleFS, scheduledMessagesPath, "");
+  if (scheduledMessagesJson != "") {    
+    SerialPrintln("Loading Scheduled Messages");
+    readScheduledMessagesFromJson(scheduledMessagesJson);
   }
   
-  String jsonString = JSON.stringify(values);
-  return jsonString;
+  SerialPrintln("Loaded Settings:");
+  SerialPrintln("   Alignment: " + alignment);
+  SerialPrintln("   Flap Speed: " + flapSpeed);
+  SerialPrintln("   Device Mode: " + deviceMode);
+  SerialPrintln("   Countdown to Date UNIX: " + countdownToDateUnix);
+  SerialPrint("   Scheduled Message Count: ");
+  SerialPrintln(scheduledMessages.size());
 }
 
 //Read File from LittleFS
@@ -49,7 +36,7 @@ String readFile(fs::FS &fs, const char * path, String defaultValue) {
 
   File file = fs.open(path, "r");
   if (!file || file.isDirectory()) {
-    SerialPrintln("- failed to open file for reading");
+    SerialPrintln("- Failed to open file for reading");
 
     if (defaultValue.length() > 0) {
       SerialPrintln("- Writing a default value as one has been specified. Default: " + defaultValue);
@@ -75,14 +62,14 @@ void writeFile(fs::FS &fs, const char * path, const char * message) {
 
   File file = fs.open(path, "w");
   if (!file) {
-    SerialPrintln("- failed to open file for writing");
+    SerialPrintln("- Failed to open file for writing");
     return;
   }
   
   if (file.print(message)) {
-    SerialPrintln("- file written");
+    SerialPrintln("- File written");
   } 
   else {
-    SerialPrintln("- frite failed");
+    SerialPrintln("- Write failed");
   }
 }

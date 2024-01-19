@@ -46,8 +46,6 @@ a {
 	background-color: #F8880E;
 }
 
-
-
 input[type=submit]:hover,
 a:hover {
 	background-color: #FFB96D;
@@ -77,6 +75,10 @@ input[type=checkbox] {
 
 input[type=datetime-local] {
 	width: 150px;
+}
+
+.hidden {
+	display: none !important;
 }
 
 .topnav {
@@ -138,11 +140,11 @@ input[type=datetime-local] {
 	color: #F8880E;
 }
 
-.card .character-count {
+.card .count {
 	display: block;
 	font-size: 14px;
 }
-.card .character-count label {
+.card .count label {
 	font-size: 14px;
 }
 
@@ -198,6 +200,11 @@ input[type=datetime-local] {
 
 .scheduled-messages {
 	width: 100%;
+	padding-bottom: 5px;
+}
+
+.scheduled-messages .message:last-child {
+	padding-bottom: 0;
 }
 
 .message {
@@ -246,6 +253,19 @@ input[type=datetime-local] {
 .message .action .remove-button:hover {
 	background-color: #FFB96D;
 	cursor: pointer;
+}
+
+.actions {
+    display: flex;
+    justify-content: center;
+	padding: 0 10px 10px 10px;
+}
+
+.actions a {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	height: 35px;
 }
 
 @media (max-width: 700px) {

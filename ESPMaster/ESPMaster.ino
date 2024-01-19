@@ -1,40 +1,100 @@
+/* ####################################################################################################################### */
+/* # ____  ____  _     ___ _____   _____ _        _    ____    _____ ____  ____    __  __    _    ____ _____ _____ ____  # */
+/* #/ ___||  _ \| |   |_ _|_   _| |  ___| |      / \  |  _ \  | ____/ ___||  _ \  |  \/  |  / \  / ___|_   _| ____|  _ \ # */
+/* #\___ \| |_) | |    | |  | |   | |_  | |     / _ \ | |_) | |  _| \___ \| |_) | | |\/| | / _ \ \___ \ | | |  _| | |_) |# */
+/* # ___) |  __/| |___ | |  | |   |  _| | |___ / ___ \|  __/  | |___ ___) |  __/  | |  | |/ ___ \ ___) || | | |___|  _ < # */
+/* #|____/|_|   |_____|___| |_|   |_|   |_____/_/   \_|_|     |_____|____/|_|     |_|  |_/_/   \_|____/ |_| |_____|_| \_\# */
+/* ####################################################################################################################### */
 /*
-*********************
-Split Flap ESP Master
-*********************
+  This project project is done for fun as part of: https://github.com/JonnyBooker/split-flap
+  None of this would be possible without the brilliant work of David Königsmann: https://github.com/Dave19171/split-flap
+
+  Licensed under GNU: https://github.com/JonnyBooker/split-flap/blob/master/LICENSE
 */
+
+/* .--------------------------------------------------------------------------------. */
+/* |  ___           __ _                    _    _       ___       __ _             | */
+/* | / __|___ _ _  / _(_)__ _ _  _ _ _ __ _| |__| |___  |   \ ___ / _(_)_ _  ___ ___| */
+/* || (__/ _ | ' \|  _| / _` | || | '_/ _` | '_ | / -_) | |) / -_|  _| | ' \/ -_(_-<| */
+/* | \___\___|_||_|_| |_\__, |\_,_|_| \__,_|_.__|_\___| |___/\___|_| |_|_||_\___/__/| */
+/* |                    |___/                                                       | */
+/* '--------------------------------------------------------------------------------' */
+/*
+  These define statements can be changed as you desire for changing the functionality and
+  behaviour of your device.
+*/
+#define SERIAL_ENABLE       false   //Option to enable serial debug messages
+#define UNIT_CALLS_DISABLE  false   //Option to disable the call to the units so can just debug the ESP with no connections
+#define OTA_ENABLE          true    //Option to enable OTA functionality
+#define UNITS_AMOUNT        10      //Amount of connected units !IMPORTANT TO BE SET CORRECTLY!
+#define SERIAL_BAUDRATE     115200  //Serial debugging BAUD rate
+#define WIFI_SETUP_MODE     AP      //Option to either direct connect to a WiFi Network or setup a AP to configure WiFi. Options: AP or DIRECT
+
+/* .--------------------------------------------------------. */
+/* | ___         _               ___       __ _             | */
+/* |/ __|_  _ __| |_ ___ _ __   |   \ ___ / _(_)_ _  ___ ___| */
+/* |\__ | || (_-|  _/ -_| '  \  | |) / -_|  _| | ' \/ -_(_-<| */
+/* ||___/\_, /__/\__\___|_|_|_| |___/\___|_| |_|_||_\___/__/| */
+/* |     |__/                                               | */
+/* '--------------------------------------------------------' */
+/*
+  These are important to maintain normal system behaviour. Only change if you know 
+  what your doing.
+*/
+#define ANSWER_SIZE         1       //Size of unit's request answer
+#define FLAP_AMOUNT         45      //Amount of Flaps in each unit
+#define MIN_SPEED           1       //Min Speed
+#define MAX_SPEED           12      //Max Speed
+#define WEBSERVER_H                 //Needed in order to be compatible with WiFiManager: https://github.com/me-no-dev/ESPAsyncWebServer/issues/418#issuecomment-667976368
+
+/* .-----------------------------------. */
+/* | _    _ _                 _        | */
+/* || |  (_| |__ _ _ __ _ _ _(_)___ ___| */
+/* || |__| | '_ | '_/ _` | '_| / -_(_-<| */
+/* ||____|_|_.__|_| \__,_|_| |_\___/__/| */
+/* '-----------------------------------' */
+/*
+  External library dependencies, not much more to say!
+*/
+
+//WiFi Setup Library if we use that mode
+//Specifically put here in this order to avoid conflict with other libraries
+#if WIFI_SETUP_MODE == AP
+#include <WiFiManager.h>
+#endif
+
+//OTA Libary if we are into that kind of thing
+#if OTA_ENABLE == true
+#include <ArduinoOTA.h>
+#endif
+
 #include <Arduino.h>
-#include <Arduino_JSON.h>
-#include <ESP8266WiFi.h>
+#include <ArduinoJson.h>
 #include <ESPAsyncTCP.h>
 #include <ESPAsyncWebServer.h>
+#include <ESP8266WiFi.h>
 #include <ezTime.h>
+#include <LinkedList.h>
 #include <NTPClient.h>
 #include <WiFiUdp.h>
 #include <Wire.h>
-#include <LinkedList.h>
-
 #include "Classes.h"
 #include "LittleFS.h"
+/* .------------------------------------------------------------------------------------. */
+/* |  ___           __ _                    _    _       ___     _   _   _              | */
+/* | / __|___ _ _  / _(_)__ _ _  _ _ _ __ _| |__| |___  / __|___| |_| |_(_)_ _  __ _ ___| */
+/* || (__/ _ | ' \|  _| / _` | || | '_/ _` | '_ | / -_) \__ / -_|  _|  _| | ' \/ _` (_-<| */
+/* | \___\___|_||_|_| |_\__, |\_,_|_| \__,_|_.__|_\___| |___\___|\__|\__|_|_||_\__, /__/| */
+/* |                    |___/                                                  |___/    | */
+/* '------------------------------------------------------------------------------------' */
+/*
+  Settings you can feel free to change to customise how your display works.
+*/
+//Used if connecting via "WIFI_SETUP_MODE" of "DIRECT" - Otherwise, leave blank
+const char* wifiDirectSsid = "";
+const char* wifiDirectPassword = "";
 
-#define BAUDRATE 115200     //Serial debugging BAUD rate
-#define ANSWERSIZE 1        //Size of unit's request answer
-#define UNITSAMOUNT 10      //Amount of connected units !IMPORTANT!
-#define FLAPAMOUNT 45       //Amount of Flaps in each unit
-#define MINSPEED 1          //Min Speed
-#define MAXSPEED 12         //Max Speed
-#define OTA_ENABLE          //Comment out to disable OTA functionality
-//#define SERIAL_ENABLE       //Uncomment for serial debug messages, no serial messages if this whole line is a comment!
-//#define UNIT_CALLS_DISABLE  //Disable the call to the units so can just debug the ESP
-
-//The current version of code to display on the UI
-const char* espVersion = "1.3.0";
-
-//REPLACE WITH YOUR NETWORK CREDENTIALS
-const char* ssid = "SSID";
-const char* password = "12345678901234567890";
-
-//Change if you want to have an OTA Password
+//Change if you want to have an Over The Air (OTA) Password for updates
 const char* otaPassword = "";
 
 //Change this to your timezone, use the TZ database name
@@ -46,16 +106,27 @@ const char* timezoneString = "Europe/London";
 const char* dateFormat = "d.m.Y"; //Examples: d.m.Y -> 11.09.2021, D M y -> SAT SEP 21
 const char* clockFormat = "H:i"; //Examples: H:i -> 21:19, h:ia -> 09:19PM
 
+//How long to show a message for when a scheduled message is shown for
+const int scheduledMessageDisplayTimeMillis = 7500;
+
+/* .------------------------------------------------------------. */
+/* | ___         _               ___     _   _   _              | */
+/* |/ __|_  _ __| |_ ___ _ __   / __|___| |_| |_(_)_ _  __ _ ___| */
+/* |\__ | || (_-|  _/ -_| '  \  \__ / -_|  _|  _| | ' \/ _` (_-<| */
+/* ||___/\_, /__/\__\___|_|_|_| |___\___|\__|\__|_|_||_\__, /__/| */
+/* |     |__/                                          |___/    | */
+/* '------------------------------------------------------------' */
+/*
+  Used for normal running of the system so changing things here might make things 
+  behave a little strange.
+*/
+//The current version of code to display on the UI
+const char* espVersion = "2.0.0";
+
+//All the letters on the units that we have to be displayed. You can change these if it so pleases at your own risk
 const char letters[] = {' ', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '$', '&', '#', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ':', '.', '-', '?', '!'};
-int displayState[UNITSAMOUNT];
+int displayState[UNITS_AMOUNT];
 unsigned long previousMillis = 0;
-
-//Variables for storing text for the display to use
-String lastWrittenText = "";
-LinkedList<ScheduledMessage> scheduledMessages;
-
-//Create AsyncWebServer object on port 80
-AsyncWebServer server(80);
 
 //Search for parameter in HTTP POST request
 const char* PARAM_ALIGNMENT = "alignment";
@@ -64,357 +135,480 @@ const char* PARAM_DEVICEMODE = "deviceMode";
 const char* PARAM_INPUT_TEXT = "inputText";
 const char* PARAM_SCHEDULE_ENABLED = "scheduleEnabled";
 const char* PARAM_SCHEDULE_DATE_TIME = "scheduledDateTimeUnix";
+const char* PARAM_COUNTDOWN_DATE = "countdownDateTimeUnix";
 const char* PARAM_ID = "id";
 
 //Device Modes
 const char* DEVICE_MODE_TEXT = "text";
 const char* DEVICE_MODE_CLOCK = "clock";
 const char* DEVICE_MODE_DATE = "date";
+const char* DEVICE_MODE_COUNTDOWN = "countdown";
 
 //Alignment options
 const char* ALIGNMENT_MODE_LEFT = "left";
 const char* ALIGNMENT_MODE_CENTER = "center";
 const char* ALIGNMENT_MODE_RIGHT = "right";
 
-//Variables to save values from HTML form
-String alignment = "";
-String flapSpeed = "";
-String inputText = "";
-String previousDeviceMode = "";
-String currentDeviceMode = "";
-long newMessageScheduledDateTimeUnix = 0;
-bool newMessageScheduleEnabled = false;
-
 //File paths to save input values permanently
 const char* alignmentPath = "/alignment.txt";
 const char* flapSpeedPath = "/flapspeed.txt";
 const char* deviceModePath = "/devicemode.txt";
+const char* countdownPath = "/countdown.txt";
+const char* scheduledMessagesPath = "/scheduled-messages.txt";
 
-//Create ezTime timezone object
+//Variables for storing things for checking and use in normal running
+String alignment = "";
+String flapSpeed = "";
+String inputText = "";
+String deviceMode = "";
+String countdownToDateUnix = "";
+String lastWrittenText = "";
+String lastReceivedMessageDateTime = "";
+bool alignmentUpdated = false;
+bool isPendingReboot = false;
+bool isPendingWifiReset = false;
+bool isPendingUnitsReset = false;
+LinkedList<ScheduledMessage> scheduledMessages;
 Timezone timezone; 
 
-//OTA Functionality
-#ifdef OTA_ENABLE
-#include <ArduinoOTA.h>
+//Create AsyncWebServer object on port 80
+AsyncWebServer webServer(80);
+
+//Used for creating a Access Point to allow WiFi setup
+#if WIFI_SETUP_MODE == AP
+WiFiManager wifiManager;
+bool isWifiConfigured = false;
+#endif
 
 //Used to denote that the system has gone into OTA mode
-bool isInOtaMode = 0;
+#if OTA_ENABLE == true
+bool isInOtaMode = false;
 #endif
 
-//Denotes the system is pending a restart
-bool isPendingReboot = 0;
-
-//Denotes the system needs calibrating
-bool isPendingUnitsReset = 0;
-
-//Used for display on the UI
-String lastReceivedMessageDateTime;
-
+/* .-----------------------------------------------. */
+/* | ___          _          ___     _             | */
+/* ||   \ _____ _(_)__ ___  / __|___| |_ _  _ _ __ | */
+/* || |) / -_\ V | / _/ -_) \__ / -_|  _| || | '_ \| */
+/* ||___/\___|\_/|_\__\___| |___\___|\__|\_,_| .__/| */
+/* |                                         |_|   | */
+/* '-----------------------------------------------' */
 void setup() {
-  //Serial port for debugging purposes
-#ifdef SERIAL_ENABLE
-  Serial.begin(BAUDRATE);
-#endif
-
-  SerialPrintln("#######################################################");
-  SerialPrintln("Master module starting...");
-
-#ifdef OTA_ENABLE
-  SerialPrintln("OTA Enabled...");
-#endif
-
-  //deactivate I2C if debugging the ESP, otherwise serial does not work
-#ifndef SERIAL_ENABLE
-  Wire.begin(1, 3); //For ESP01 only
-#endif
+#if SERIAL_ENABLE == true
+  //Setup so we can see serial messages
+  Serial.begin(SERIAL_BAUDRATE);
+#else
+  //For ESP01 only
+  Wire.begin(1, 3); 
+  
+  //De-activate I2C if debugging the ESP, otherwise serial does not work
   //Wire.begin(D1, D2); //For NodeMCU testing only SDA=D1 and SCL=D2
-
-  initWiFi(); //initializes WiFi
-  initialiseFileSystem(); //initializes filesystem
-  loadValuesFromFileSystem(); //loads initial values from filesystem
-
-  //ezTime initialization
-  waitForSync();
-  timezone.setLocation(timezoneString);
-
-  //Web Server Root URL
-  server.on("/", HTTP_GET, [](AsyncWebServerRequest * request) {
-    SerialPrintln("Request Home Page Received");
-
-    request->send(LittleFS, "/index.html", "text/html");
-  });
-
-  server.serveStatic("/", LittleFS, "/");
-
-  server.on("/settings", HTTP_GET, [](AsyncWebServerRequest * request) {
-    SerialPrintln("Request for Settings Received");
-    
-    String json = getCurrentSettingValues();
-    request->send(200, "application/json", json);
-    json = String();
-  });
-  
-  server.on("/health", HTTP_GET, [](AsyncWebServerRequest * request) {
-    SerialPrintln("Request for Health Check Received");
-    
-    String json = getCurrentSettingValues();
-    request->send(200, "text/plain", "Healthy");
-  });
-
-#ifdef OTA_ENABLE
-  server.on("/ota", HTTP_GET, [](AsyncWebServerRequest * request) {
-    SerialPrintln("Request to start OTA mode received");
-    
-    //Create HTML page to explain OTA
-    IPAddress ip = WiFi.localIP();
-    
-    String html = "<div style='text-align:center'>";
-    html += "<font face='arial'><h1>Split Flap - OTA Update Mode</h1>";
-    html += "<p>OTA mode has been started. You can now update your module via WiFI. Open your Arduino IDE and select the new port in \"Tools\" menu and upload the your sketch as normal!<p>";
-    html += "<p>Open your Arduino IDE and select the new port in \"Tools\" menu and upload the your sketch as normal!</p>";
-    html += "<p>After you have carried out your update, the system will automatically be rebooted. You can go to the main home page after this time by clicking the button below or going to '/'.</p>";
-    html += "<p>You can take the system out of this mode by clicking the button to reboot below or going to '/reboot'.</p>";
-    html += "<p><a href=\"http://" + ip.toString() + "\")\">Home</a></p>";
-    html += "<p><a href=\"http://" + ip.toString() + "/reboot\")\">Reboot</a></p>";
-    html += "</font>";
-    html += "</div>";
-
-    request->send(200, "text/html", html);
- 
-    if (isInOtaMode == 0) {
-      SerialPrintln("Setting OTA Hostname");
-      ArduinoOTA.setHostname("split-flap-ota");
-
-      //If there is a password set, disabled by default for ease
-      if (otaPassword != "") {
-        ArduinoOTA.setPassword(otaPassword);
-      }
-      
-      SerialPrintln("Starting OTA Mode");
-      ArduinoOTA.begin();
-      delay(100);
-    
-      ArduinoOTA.onStart([]() {
-        LittleFS.end();
-        if (ArduinoOTA.getCommand() == U_FLASH) {
-          SerialPrintln("Start updating sketch");
-        } 
-        else {
-          SerialPrintln("Start updating filesystem");
-        }  
-      });
-      
-      ArduinoOTA.onEnd([]() {
-        SerialPrintln("Finished OTA Update - Rebooting");
-        isPendingReboot = true;
-      });
-      
-      ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
-        SerialPrintf("OTA Progress: %u%%\r", (progress / (total / 100)));
-      });
-      
-      ArduinoOTA.onError([](ota_error_t error) {
-        SerialPrintf("Error[%u]: ", error);
-
-        if (error == OTA_AUTH_ERROR) {
-          SerialPrintln("Finished OTA Update - Rebooting");
-        }
-        else if (error == OTA_BEGIN_ERROR) {
-          SerialPrintln("OTA Begin Failed");
-        }
-        else if (error == OTA_CONNECT_ERROR) {
-          SerialPrintln("OTA Connect Failed");
-        }
-        else if (error == OTA_RECEIVE_ERROR) {
-          SerialPrintln("OTA Receive Failed");
-        }
-        else if (error == OTA_END_ERROR) {
-          SerialPrintln("OTA End Failed");
-        }
-      });
-      
-      //Put in OTA Mode
-      isInOtaMode = 1;
-    }
-    else {
-      SerialPrintln("Already in OTA Mode");
-    }
-  });
 #endif
-  
-  server.on("/reboot", HTTP_GET, [](AsyncWebServerRequest * request) {
-    SerialPrintln("Request to Reboot Received");
-    
-    //Create HTML page to explain the system is rebooting
-    IPAddress ip = WiFi.localIP();
-    
-    String html = "<div style='text-align:center'>";
-    html += "<font face='arial'><h1>Split Flap - Rebooting</h1>";
-    html += "<p>Reboot is pending now...<p>";
-    html += "<p>This can take anywhere between 10-20 seconds<p>";
-    html += "<p>You can go to the main home page after this time by clicking the button below or going to '/'.</p>";
-    html += "<p><a href=\"http://" + ip.toString() + "\">Home</a></p>";
-    html += "</font>";
-    html += "</div>";
-    
-    request->send(200, "text/html", html);
-    isPendingReboot = 1;
-  });
-  
-  server.on("/reset-units", HTTP_GET, [](AsyncWebServerRequest * request) {
-    SerialPrintln("Request to Reset Units Received");
-    
-    //This will be picked up in the loop
-    isPendingUnitsReset = 1;
-    
-    request->redirect("/?is-resetting-units=true");
-  });
+  SerialPrintln("");
+  SerialPrintln("#######################################################");
+  SerialPrintln("..............Split Flap Display Starting..............");
+  SerialPrintln("#######################################################");
 
-  server.on("/scheduled-message/remove", HTTP_DELETE, [](AsyncWebServerRequest * request) {
-    SerialPrintln("Request to Remove Scheduled Message Received");
-    
-    if (request->hasParam(PARAM_ID)) {
-      bool removedScheduledMessage = false;
-      String idValue = request->getParam(PARAM_ID)->value();
+  //Load and read all the things
+  initWiFi();
+  
+  //Helpful if want to force reset WiFi settings for testing
+  //wifiManager.resetSettings();
 
-      //Find the existing scheduled message and delete it
-      for(int scheduledMessageIndex = 0; scheduledMessageIndex < scheduledMessages.size(); scheduledMessageIndex++) {
-        ScheduledMessage scheduledMessage = scheduledMessages[scheduledMessageIndex];
+  if (isWifiConfigured && !isPendingReboot) {
+    //ezTime initialization
+    waitForSync();
+    timezone.setLocation(timezoneString);
     
-        if (idValue.toInt() == scheduledMessage.ScheduledDateTimeMillis) {
-          SerialPrintln("Deleting Scheduled Message due to be shown: " + scheduledMessage.Message);
-          scheduledMessages.remove(scheduledMessageIndex);
+    //Load various variables
+    initialiseFileSystem();
+    loadValuesFromFileSystem();
+
+#if OTA_ENABLE == true
+    SerialPrintln("OTA is enabled! Yay!");
+#endif
+
+    //Web Server Endpoint configuration
+    webServer.serveStatic("/", LittleFS, "/");
+    webServer.on("/", HTTP_GET, [](AsyncWebServerRequest * request) {
+      SerialPrintln("Request Home Page Received");
+
+      request->send(LittleFS, "/index.html", "text/html");
+    });
+
+    webServer.on("/settings", HTTP_GET, [](AsyncWebServerRequest * request) {
+      SerialPrintln("Request for Settings Received");
+      
+      String json = getCurrentSettingValues();
+      request->send(200, "application/json", json);
+      json = String();
+    });
+    
+    webServer.on("/health", HTTP_GET, [](AsyncWebServerRequest * request) {
+      SerialPrintln("Request for Health Check Received");
+      request->send(200, "text/plain", "Healthy");
+    });
+    
+    webServer.on("/reboot", HTTP_GET, [](AsyncWebServerRequest * request) {
+      SerialPrintln("Request to Reboot Received");
+      
+      //Create HTML page to explain the system is rebooting
+      IPAddress ip = WiFi.localIP();
+      
+      String html = "<div style='text-align:center'>";
+      html += "<font face='arial'><h1>Split Flap - Rebooting</h1>";
+      html += "<p>Reboot is pending now...<p>";
+      html += "<p>This can take anywhere between 10-20 seconds<p>";
+      html += "<p>You can go to the main home page after this time by clicking the button below or going to '/'.</p>";
+      html += "<p><a href=\"http://" + ip.toString() + "\">Home</a></p>";
+      html += "</font>";
+      html += "</div>";
+      
+      request->send(200, "text/html", html);
+      isPendingReboot = true;
+    });
+    
+    webServer.on("/reset-units", HTTP_GET, [](AsyncWebServerRequest * request) {
+      SerialPrintln("Request to Reset Units Received");
+      
+      //This will be picked up in the loop
+      isPendingUnitsReset = true;
+      
+      request->redirect("/?is-resetting-units=true");
+    });
+
+    webServer.on("/scheduled-message/remove", HTTP_DELETE, [](AsyncWebServerRequest * request) {
+      SerialPrintln("Request to Remove Scheduled Message Received");
+      
+      if (request->hasParam(PARAM_ID)) {
+        bool removedScheduledMessage = false;
+        String idValue = request->getParam(PARAM_ID)->value();
+
+        if (isNumber(idValue)) {
+          long parsedIdValue = atol(idValue.c_str());
+          bool removed = removeScheduledMessage(parsedIdValue);
           
-          removedScheduledMessage = true;
-          request->send(201, "text/plain", "Created");
-          break;
-        }
-      }
-
-      if (!removedScheduledMessage) {
-        SerialPrintln("Unable to find Scheduled Message to value. Id: " + idValue);
-        request->send(400, "text/plain", "Unable to find message with ID specified. Id: " + idValue);
-      }
-    } 
-    else {
-        SerialPrint("Delete Scheduled Message Received with no ID");
-        request->send(400, "text/plain", "No ID specified");
-    }
-  });
-
-  server.on("/", HTTP_POST, [](AsyncWebServerRequest * request) {
-    SerialPrintln("Request Post of Form Received");    
-    lastReceivedMessageDateTime = timezone.dateTime("d M y H:i:s");
-    
-    int params = request->params();
-    for (int i = 0; i < params; i++) {
-      AsyncWebParameter* p = request->getParam(i);
-      if (p->isPost()) {
-
-        //HTTP POST alignment value
-        if (p->name() == PARAM_ALIGNMENT) {
-          String receivedValue = p->value();
-          if (receivedValue == ALIGNMENT_MODE_LEFT || receivedValue == ALIGNMENT_MODE_CENTER || receivedValue == ALIGNMENT_MODE_RIGHT) {
-            alignment = receivedValue;
-            
-            SerialPrint("Alignment set to: ");
-            SerialPrintln(alignment);
-  
-            writeFile(LittleFS, alignmentPath, alignment.c_str());
+          if (removed) {
+            request->send(202, "text/plain", "Removed");
           }
           else {
-            SerialPrint("Alignment provided was not valid. Value: " + receivedValue); 
+            request->send(400, "text/plain", "Unable to find message with ID specified. Id: " + idValue);
           }
         }
+        else {
+          SerialPrintln("Invalid Delete Scheduled Message ID Received");
+          request->send(400, "text/plain", "Invalid ID value");
+        }
+      } 
+      else {
+          SerialPrintln("Delete Scheduled Message Received with no ID");
+          request->send(400, "text/plain", "No ID specified");
+      }
+    });
 
-        //HTTP POST device mode value
-        if (p->name() == PARAM_DEVICEMODE) {
-          String receivedValue = p->value();
-          if (receivedValue == DEVICE_MODE_TEXT || receivedValue == DEVICE_MODE_CLOCK || receivedValue == DEVICE_MODE_DATE) {
-            currentDeviceMode = receivedValue;
-            previousDeviceMode = currentDeviceMode;
-            
-            SerialPrint("Device Mode set to: ");
-            SerialPrintln(currentDeviceMode);
-  
-            writeFile(LittleFS, deviceModePath, currentDeviceMode.c_str());            
+    webServer.on("/", HTTP_POST, [](AsyncWebServerRequest * request) {
+      SerialPrintln("Request Post of Form Received");    
+
+      bool submissionError = false;
+      
+      bool newMessageScheduleEnabledValue;
+      long newMessageScheduleDateTimeUnixValue;
+      String newAlignmentValue, newDeviceModeValue, newFlapSpeedValue, newInputTextValue, newCountdownToDateUnixValue;
+      
+      int params = request->params();
+      for (int paramIndex = 0; paramIndex < params; paramIndex++) {
+        AsyncWebParameter* p = request->getParam(paramIndex);
+        if (p->isPost()) {
+          //HTTP POST alignment value
+          if (p->name() == PARAM_ALIGNMENT) {
+            String receivedValue = p->value();
+            if (receivedValue == ALIGNMENT_MODE_LEFT || receivedValue == ALIGNMENT_MODE_CENTER || receivedValue == ALIGNMENT_MODE_RIGHT) {
+              newAlignmentValue = receivedValue;
+            }
+            else {
+              SerialPrintln("Alignment provided was not valid. Value: " + receivedValue); 
+              submissionError = true;
+            }
           }
-          else {
-            SerialPrint("Device Mode provided was not valid. Value: " + receivedValue); 
+
+          //HTTP POST device mode value
+          if (p->name() == PARAM_DEVICEMODE) {
+            String receivedValue = p->value();
+            if (receivedValue == DEVICE_MODE_TEXT || receivedValue == DEVICE_MODE_CLOCK || receivedValue == DEVICE_MODE_DATE || receivedValue == DEVICE_MODE_COUNTDOWN) {
+              newDeviceModeValue = receivedValue;          
+            }
+            else {
+              SerialPrintln("Device Mode provided was not valid. Invalid Value: " + receivedValue); 
+              submissionError = true;
+            }
+          }
+
+          //HTTP POST Flap Speed Slider value
+          if (p->name() == PARAM_FLAP_SPEED) {
+            newFlapSpeedValue = p->value().c_str();
+          }
+
+          //HTTP POST inputText value
+          if (p->name() == PARAM_INPUT_TEXT) {
+            newInputTextValue = p->value().c_str();
+          }
+
+          //HTTP POST Schedule Enabled
+          if (p->name() == PARAM_SCHEDULE_ENABLED) {
+            String newMessageScheduleEnabledString = p->value().c_str();
+            newMessageScheduleEnabledValue = newMessageScheduleEnabledString == "on" ?
+              true : 
+              false;
+          }
+
+          //HTTP POST Schedule Seconds
+          if (p->name() == PARAM_SCHEDULE_DATE_TIME) {
+            String receivedValue = p->value().c_str();
+            if (isNumber(receivedValue)) {
+              newMessageScheduleDateTimeUnixValue = atol(receivedValue.c_str());
+            }
+            else {
+              SerialPrintln("Schedule date time provided was not valid. Invalid Value: " + receivedValue); 
+              submissionError = true;
+            }
+          }
+
+          //HTTP POST Countdown Seconds
+          if (p->name() == PARAM_COUNTDOWN_DATE) {
+            String receivedValue = p->value().c_str();
+            if (isNumber(receivedValue)) {
+              newCountdownToDateUnixValue = receivedValue;
+            }
+            else {
+              SerialPrintln("Countdown date provided was not valid. Invalid Value: " + receivedValue); 
+              submissionError = true;
+            }
           }
         }
+      }    
 
-        //HTTP POST Flap Speed Slider value
-        if (p->name() == PARAM_FLAP_SPEED) {
-          flapSpeed = p->value().c_str();
-          SerialPrint("Flap Speed set to: ");
-          SerialPrintln(flapSpeed);
+      //If there was an error, report back to check what has been input
+      if (submissionError) {
+        SerialPrintln("Finished Processing Request with Error");
+        request->redirect("/?invalid-submission=" + true);
+      }
+      else {
+        SerialPrintln("Finished Processing Request Successfully");
+
+        lastReceivedMessageDateTime = timezone.dateTime("d M y H:i:s");
+
+        //Only if a new alignment value
+        if (alignment != newAlignmentValue) {
+          alignment = newAlignmentValue;
+          alignmentUpdated = true;
+
+          writeFile(LittleFS, alignmentPath, alignment.c_str());
+          SerialPrintln("Alignment Updated: " + alignment);
+        }
+
+        //Only if a new flap speed value
+        if (flapSpeed != newFlapSpeedValue) {
+          flapSpeed = newFlapSpeedValue;
 
           writeFile(LittleFS, flapSpeedPath, flapSpeed.c_str());
+          SerialPrintln("Flap Speed Updated: " + flapSpeed);
         }
 
-        //HTTP POST inputText value
-        if (p->name() == PARAM_INPUT_TEXT) {
-          inputText = p->value().c_str();
-          
-          if (inputText != "") {
-            SerialPrint("Input Text set to: ");
-            SerialPrintln(inputText); 
+        //Only if countdown date has changed
+        if (countdownToDateUnix != newCountdownToDateUnixValue) {
+          countdownToDateUnix = newCountdownToDateUnixValue;
+
+          writeFile(LittleFS, countdownPath, countdownToDateUnix.c_str());
+          SerialPrintln("Countdown Date Time Unix Updated: " + countdownToDateUnix);
+        }
+
+        //If its a new scheduled message, add it to the backlog and proceed, don't want to change device mode
+        //Else, we do want to change the device mode and clear out the input text
+        if (newMessageScheduleEnabledValue) {
+          addAndPersistScheduledMessage(newInputTextValue, newMessageScheduleDateTimeUnixValue);
+          SerialPrintln("New Scheduled Message added");
+        }
+        else {
+          //Only if device mode has changed
+          if (deviceMode != newDeviceModeValue) {
+            deviceMode = newDeviceModeValue;
+
+            writeFile(LittleFS, deviceModePath, deviceMode.c_str());
+            SerialPrintln("Device Mode Set: " + deviceMode);
           }
-          else {
-            SerialPrint("Input Text set to: <Blank>");
+
+          //Only if we are showing text
+          if (deviceMode == DEVICE_MODE_TEXT) {
+            inputText = newInputTextValue;
           }
         }
 
-        //HTTP POST Schedule Enabled
-        if (p->name() == PARAM_SCHEDULE_ENABLED) {
-          String newMessageScheduleEnabledString = p->value().c_str();
-          newMessageScheduleEnabled = newMessageScheduleEnabledString == "on" ?
-            true : 
-            false;
-            
-          SerialPrint("Schedule Enable set to: ");
-          SerialPrintln(newMessageScheduleEnabled);  
-        }
-
-        //HTTP POST Schedule Millis
-        if (p->name() == PARAM_SCHEDULE_DATE_TIME) {
-          String scheduleMillis = p->value().c_str();
-          newMessageScheduledDateTimeUnix = atol(scheduleMillis.c_str());
-
-          SerialPrint("Schedule Date Time set to: ");
-          SerialPrintln(scheduleMillis);
-        }
+        //Redirect so that we don't have the "re-submit form" problem in browser for refresh
+        request->redirect("/");
       }
+    });
+
+#if OTA_ENABLE == true
+    webServer.on("/ota", HTTP_GET, [](AsyncWebServerRequest * request) {
+      SerialPrintln("Request to start OTA mode received");
+      
+      //Create HTML page to explain OTA
+      IPAddress ip = WiFi.localIP();
+      
+      String html = "<div style='text-align:center'>";
+      html += "<font face='arial'><h1>Split Flap - OTA Update Mode</h1>";
+      html += "<p>OTA mode has been started. You can now update your module via WiFI. Open your Arduino IDE and select the new port in \"Tools\" menu and upload the your sketch as normal!<p>";
+      html += "<p>Open your Arduino IDE and select the new port in \"Tools\" menu and upload the your sketch as normal!</p>";
+      html += "<p>After you have carried out your update, the system will automatically be rebooted. You can go to the main home page after this time by clicking the button below or going to '/'.</p>";
+      html += "<p>You can take the system out of this mode by clicking the button to reboot below or going to '/reboot'.</p>";
+      html += "<p><a href=\"http://" + ip.toString() + "\")\">Home</a></p>";
+      html += "<p><a href=\"http://" + ip.toString() + "/reboot\")\">Reboot</a></p>";
+      html += "</font>";
+      html += "</div>";
+
+      request->send(200, "text/html", html);
+  
+      if (!isInOtaMode) {
+        SerialPrintln("Setting OTA Hostname");
+        ArduinoOTA.setHostname("Split-Flap-OTA");
+
+        //If there is a password set, disabled by default for ease
+        if (otaPassword != "") {
+          ArduinoOTA.setPassword(otaPassword);
+        }
+        
+        SerialPrintln("Starting OTA Mode");
+        ArduinoOTA.begin();
+        delay(100);
+      
+        ArduinoOTA.onStart([]() {
+          LittleFS.end();
+          if (ArduinoOTA.getCommand() == U_FLASH) {
+            SerialPrintln("Start updating sketch");
+          } 
+          else {
+            SerialPrintln("Start updating filesystem");
+          }  
+        });
+        
+        ArduinoOTA.onEnd([]() {
+          SerialPrintln("Finished OTA Update - Rebooting");
+          isPendingReboot = true;
+        });
+        
+        ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
+          SerialPrintf("OTA Progress: %u%%\r", (progress / (total / 100)));
+        });
+        
+        ArduinoOTA.onError([](ota_error_t error) {
+          SerialPrintf("Error[%u]: ", error);
+
+          if (error == OTA_AUTH_ERROR) {
+            SerialPrintln("Finished OTA Update - Rebooting");
+          }
+          else if (error == OTA_BEGIN_ERROR) {
+            SerialPrintln("OTA Begin Failed");
+          }
+          else if (error == OTA_CONNECT_ERROR) {
+            SerialPrintln("OTA Connect Failed");
+          }
+          else if (error == OTA_RECEIVE_ERROR) {
+            SerialPrintln("OTA Receive Failed");
+          }
+          else if (error == OTA_END_ERROR) {
+            SerialPrintln("OTA End Failed");
+          }
+        });
+        
+        //Put in OTA Mode
+        isInOtaMode = true;
+      }
+      else {
+        SerialPrintln("Already in OTA Mode");
+      }
+    });
+#endif
+
+#if WIFI_SETUP_MODE == AP
+    webServer.on("/reset-wifi", HTTP_GET, [](AsyncWebServerRequest * request) {
+      SerialPrintln("Request to Reset WiFi Received");
+      
+      IPAddress ip = WiFi.localIP();
+      
+      String html = "<div style='text-align:center'>";
+      html += "<font face='arial'><h1>Split Flap - Resetting WiFi</h1>";
+      html += "<p>WiFi Settings have been erased. Device will now reboot...<p>";
+      html += "<p>You will now be able to connect to this device in AP mode to configure the WiFi once more<p>";
+      html += "<p>You can go to the main home page after this time by clicking the button below or going to '/'.</p>";
+      html += "<p><a href=\"http://" + ip.toString() + "\">Home</a></p>";
+      html += "</font>";
+      html += "</div>";
+      
+      request->send(200, "text/html", html);
+      isPendingWifiReset = true;
+    });
+#endif   
+
+    delay(250);
+    webServer.begin();
+
+    SerialPrintln("Split Flap Ready!");
+    SerialPrintln("#######################################################");
+  }
+  else {
+    if (isPendingReboot) {
+      SerialPrintln("Reboot is pending to be able to continue device function. Hold please...");
+      SerialPrintln("#######################################################");
     }
-
-    //Delay to give time to process the scheduled message
-    delay(1024);
-
-    //Redirect so that we don't have the "re-submit form" problem in browser for refresh
-    request->redirect("/");
-  });
-  
-  server.begin();
-  
-  SerialPrintln("Master module ready!");
-  SerialPrintln("#######################################################");
+    else {
+      SerialPrintln("Unable to connect to WiFi... Not starting web server");
+      SerialPrintln("Please hard restart your device to try connect again");
+      SerialPrintln("#######################################################");
+    }
+  }
 }
 
+/* .----------------------------------------------------. */
+/* | ___                _             _                 | */
+/* || _ \_  _ _ _  _ _ (_)_ _  __ _  | |   ___ ___ _ __ | */
+/* ||   | || | ' \| ' \| | ' \/ _` | | |__/ _ / _ | '_ \| */
+/* ||_|_\\_,_|_||_|_||_|_|_||_\__, | |____\___\___| .__/| */
+/* |                          |___/               |_|   | */
+/* '----------------------------------------------------' */
 void loop() {
   //Reboot in here as if we restart within a request handler, no response is returned
-  if (isPendingReboot == 1) {
-    SerialPrintln("Rebooting Now...");
-    delay(200);
+  if (isPendingReboot) {
+    SerialPrintln("Rebooting Now... Fairwell!");
+    SerialPrintln("#######################################################");
+    delay(100);
+
     ESP.restart();
+    return;
+  }
+
+  //Clear off the WiFi Manager Settings
+  if (isPendingWifiReset) {
+    SerialPrintln("Removing WiFi settings");
+    wifiManager.resetSettings();
+    delay(100);
+
+    isPendingReboot = true;
+    return;
+  }
+
+  //Do nothing if WiFi is not configured
+  if (!isWifiConfigured) {
+    //Show there is an error via text on display
+    deviceMode = DEVICE_MODE_TEXT;
+    alignment = ALIGNMENT_MODE_CENTER;
+    flapSpeed = "80";
+
+    showText("OFFLINE");
+    delay(100);
+    return;
   }
 
   if (isPendingUnitsReset) {
     SerialPrintln("Reseting Units now...");
-
-    //Set the device mode to "Text" so can do a reset
-    previousDeviceMode = currentDeviceMode;
-    currentDeviceMode = DEVICE_MODE_TEXT;
 
     //Blank out the message
     String blankOutText1 = createRepeatingString('-');
@@ -425,104 +619,80 @@ void loop() {
     String blankOutText2 = createRepeatingString('.');
     showText(blankOutText2);
 
-    //Put back to the mode we was just in
-    currentDeviceMode = previousDeviceMode;
-
-    //Try re-display the last message now we've reset if we was in text mode
-    if (currentDeviceMode == DEVICE_MODE_TEXT) {
-      showText(lastWrittenText);
-    }
-
     //We did a reset!
-    isPendingUnitsReset = 0;
+    isPendingUnitsReset = false;
 
     SerialPrintln("Done Units Reset!");
   }
   
-#ifdef OTA_ENABLE
+#if OTA_ENABLE == true
   //If System is in OTA, try handle!
-  if(isInOtaMode == 1) {
+  if(isInOtaMode) {
     ArduinoOTA.handle();
     delay(1);
   }
 #endif
 
-  //ezTime library function
+  //ezTime library sync
   events(); 
-
-  //Reset loop delay
-  unsigned long currentMillis = millis();
   
-  //Delay to not spam web requests
-  if (currentMillis - previousMillis >= 1024) {
+  //Process every second
+  unsigned long currentMillis = millis();
+  if (currentMillis - previousMillis >= 1000) {
     previousMillis = currentMillis;
 
     checkScheduledMessages();
+    checkCountdown();
 
     //Mode Selection
-    if (currentDeviceMode == DEVICE_MODE_TEXT) { 
+    if (deviceMode == DEVICE_MODE_TEXT || deviceMode == DEVICE_MODE_COUNTDOWN) { 
       showText(inputText);
     } 
-    else if (currentDeviceMode == DEVICE_MODE_DATE) {
-      showDate();
+    else if (deviceMode == DEVICE_MODE_DATE) {
+      showText(timezone.dateTime(dateFormat));
     } 
-    else if (currentDeviceMode == DEVICE_MODE_CLOCK) {
-      showClock();
-    }
+    else if (deviceMode == DEVICE_MODE_CLOCK) {
+      showText(timezone.dateTime(clockFormat));
+    } 
   }
 }
 
-void checkScheduledMessages() {   
-  //Add the message to the scheduled list and mark as no longer scheduled
-  //set the last written message to the scheduled one so don't repeat
-  if (newMessageScheduleEnabled) {
-    SerialPrintln("Processing New Scheduled Message");
+//Gets all the currently stored calues from memory in a JSON object
+String getCurrentSettingValues() {
+  JsonDocument document;
 
-    //Find the existing scheduled message and update it if one exists
-    for(int scheduledMessageIndex = 0; scheduledMessageIndex < scheduledMessages.size(); scheduledMessageIndex++) {
-      ScheduledMessage scheduledMessage = scheduledMessages[scheduledMessageIndex];
+  document["timezoneOffset"] = timezone.getOffset();
+  document["unitCount"] = UNITS_AMOUNT;
+  document["alignment"] = alignment;
+  document["flapSpeed"] = flapSpeed;
+  document["deviceMode"] = deviceMode;
+  document["version"] = espVersion;
+  document["lastTimeReceivedMessageDateTime"] = lastReceivedMessageDateTime;
+  document["lastWrittenText"] = lastWrittenText;
+  document["countdownToDateUnix"] = atol(countdownToDateUnix.c_str());
 
-      if (newMessageScheduledDateTimeUnix == scheduledMessage.ScheduledDateTimeMillis) {
-        SerialPrintln("Removing Existing Scheduled Message due to be shown, it will be replaced");
-        scheduledMessages.remove(scheduledMessageIndex);
-        break;
-      }
-    }
-
-    //If we haven't just updated one, then we need to add it
-    if (newMessageScheduledDateTimeUnix > timezone.now()) {
-      SerialPrintln("Adding new Scheduled Message");
-      scheduledMessages.add({inputText, newMessageScheduledDateTimeUnix});
-    }
-
-    //No longer got a scheduled message to process
-    newMessageScheduleEnabled = false;
-
-    //Only if we are in text mode, do we change the current input text to the last written message 
-    //so it doesn't write the scheduled message, otherwise, it will affect other modes
-    if (currentDeviceMode == DEVICE_MODE_TEXT) {
-      inputText = lastWrittenText;
-    }
-  }
-
-  //Iterate over the current bunch of scheduled messages. If we find one where the current time exceeds when we should show
-  //the message, then we need to show that message immediately
-  unsigned long currentTimeMillis = timezone.now();
   for(int scheduledMessageIndex = 0; scheduledMessageIndex < scheduledMessages.size(); scheduledMessageIndex++) {
     ScheduledMessage scheduledMessage = scheduledMessages[scheduledMessageIndex];
-
-    if (currentTimeMillis > scheduledMessage.ScheduledDateTimeMillis) {
-      SerialPrintln("Scheduled Message due to be shown: " + scheduledMessage.Message);
-
-      //Set the next message to 
-      inputText = scheduledMessage.Message;
-
-      //Set the device mode to "Text" so can show a scheduled message
-      previousDeviceMode = currentDeviceMode;
-      currentDeviceMode = DEVICE_MODE_TEXT;
-
-      scheduledMessages.remove(scheduledMessageIndex);
-      break;
-    }
+    
+    document["scheduledMessages"][scheduledMessageIndex]["scheduledDateTimeUnix"] = scheduledMessage.ScheduledDateTimeUnix;
+    document["scheduledMessages"][scheduledMessageIndex]["message"] = scheduledMessage.Message;
   }
+
+#if OTA_ENABLE == true
+  document["otaEnabled"] = true;
+  document["isInOtaMode"] = isInOtaMode;
+#else
+  document["otaEnabled"] = false;
+#endif
+
+#if WIFI_SETUP_MODE == AP
+  document["wifiSettingsResettable"] = true;
+#else
+  document["wifiSettingsResettable"] = false;
+#endif
+  
+  String jsonString;
+  serializeJson(document, jsonString);
+
+  return jsonString;
 }
