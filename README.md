@@ -118,6 +118,7 @@ This uploads the website onto the ESP8266's file system.
 There are several options in the Sketch you can modify to customise or change the behaviour of the display. These are marked in the code as "Configurable". 
 
 By default, the system will run in an "Access Point" mode where you will be able to connect to the display and put in WiFi credentials directly. This means if you WiFi changes, you don't have to re-upload a new sketch. Screenshot of the WiFi setup portal:
+
 ![Screenshot WiFi Portal](./Images/Access-Point-Screenshot.jpg)
 
 Alternatively, you can specify credentials directly. You can go ahead and change the credentials in these variables:
