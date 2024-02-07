@@ -64,7 +64,7 @@ int convertSpeed(String flapSpeed) {
   return flapSpeedInt;
 }
 
-LinkedList<String> processSentenceToLines(String sentence) {    
+LList<String> processSentenceToLines(String sentence) {    
   SerialPrintln("Processing Sentence to lines");
   
   //Remove trailing and preceding whitespace
@@ -97,7 +97,7 @@ LinkedList<String> processSentenceToLines(String sentence) {
   }
     
   // Split the string into substrings based on spaces
-  LinkedList<String> words; 
+  LList<String> words; 
   while (sentence.length() > 0)
   {
     //Find the next space
@@ -118,7 +118,7 @@ LinkedList<String> processSentenceToLines(String sentence) {
   }
 
   //Now process the words into lines where possible
-  LinkedList<String> lines;
+  LList<String> lines;
   String inProgressLine;
   while(words.size() != 0) 
   {

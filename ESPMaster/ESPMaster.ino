@@ -71,10 +71,9 @@
 #include <Arduino.h>
 #include <ArduinoJson.h>
 #include <ESPAsyncTCP.h>
-#include <ESPAsyncWebServer.h>
+#include <ESPAsyncWebSrv.h>
 #include <ESP8266WiFi.h>
 #include <ezTime.h>
-#include <LinkedList.h>
 #include <NTPClient.h>
 #include <WiFiUdp.h>
 #include <Wire.h>
@@ -168,7 +167,7 @@ bool alignmentUpdated = false;
 bool isPendingReboot = false;
 bool isPendingWifiReset = false;
 bool isPendingUnitsReset = false;
-LinkedList<ScheduledMessage> scheduledMessages;
+LList<ScheduledMessage> scheduledMessages;
 Timezone timezone; 
 
 //Create AsyncWebServer object on port 80

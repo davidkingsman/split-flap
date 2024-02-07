@@ -12,7 +12,7 @@ void showText(String message, int delayMillis) {
     SerialPrintln("New Message: " + messageDisplay);
     SerialPrintln("Alignment Updated: " + alignmentUpdatedDisplay);
   
-    LinkedList<String> messageLines = processSentenceToLines(message);
+    LList<String> messageLines = processSentenceToLines(message);
 
     if (messageLines.size() > 1) {
       SerialPrintln("Showing a split down message");
