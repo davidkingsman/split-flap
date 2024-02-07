@@ -80,17 +80,17 @@ This is how my 10 units are set, 1 means switch is in the up-position:
 | 0000 | 0001 | 0010 | 0011 | 0100 | 0101 | 0110 | 0111 | 1000 | 1001 |
 
 ### ESP01/ESP8266
-#### Pre-requistites
+#### Pre-requisites
 To upload the sketch to the ESP you need to install a few things to your arduino IDE.
 - Install the ESP8266 board to your Arduino IDE. You can follow [this tutorial](https://randomnerdtutorials.com/how-to-install-esp8266-board-arduino-ide/) 
 - Install the arduino ESP8266 littleFS plugin to use the file system of the ESP, you can follow [this tutorial](https://randomnerdtutorials.com/install-esp8266-nodemcu-littlefs-arduino/) 
 - Install the following libraries via Library Manager:
-  - [Arduino_JSON](https://github.com/arduino-libraries/Arduino_JSON)
-  - [NTPClient](https://github.com/arduino-libraries/NTPClient)
-  - [ezTime](https://github.com/ropg/ezTime)
-  - [LinkedList](https://github.com/ivanseidel/LinkedList)
-  - [WiFiManager](https://github.com/tzapu/WiFiManager)
-- Install the following libraries via including the included `.zip` folders in the `ArduinoLibraries` in this repository in your Arduino Libraries IDE libaries folder:
+  - [ArduinoJSON](https://github.com/bblanchon/ArduinoJson) - Version: 7.0.1
+  - [NTPClient](https://github.com/arduino-libraries/NTPClient) - Version: 3.2.1
+  - [ezTime](https://github.com/ropg/ezTime) - Version: 0.8.3
+  - [LinkedList](https://github.com/ivanseidel/LinkedList) - Version: 1.3.3
+  - [WiFiManager](https://github.com/tzapu/WiFiManager) - Version: 2.0.16-rc.2
+- Install the following libraries via including the included `.zip` folders in the `ArduinoLibraries` in this repository in your Arduino Libraries IDE libaries folder. These will need unzipped:
 	- ESPAsyncWebServer
     	- Downloaded From: https://github.com/me-no-dev/ESPAsyncWebServer/archive/master.zip
     	- This library was modified to add a namespace to the `LinkedList` used within its internals to avoid conflicts with `LinkedList` library
