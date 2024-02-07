@@ -22,13 +22,6 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Unzip Arduino Libraries
-        run: |
-          mkdir ~/Arduino
-          mkdir ~/Arduino/libraries
-          unzip ./ArduinoLibraries/ESPAsyncTCP-master.zip -d ~/Arduino/libraries/
-          unzip ./ArduinoLibraries/ESPAsyncWebServer-master.zip -d ~/Arduino/libraries/
-
       - name: Compile sketch
         uses: arduino/compile-sketches@v1
         with:
@@ -43,10 +36,12 @@ jobs:
               version: 7.0.1
             - name: ArduinoOTA
               version: 1.0.12
-            - name: NTPClient
-              version: 3.2.1
+            - name: ESPAsyncWebSrv
+              version: 1.2.7
             - name: ezTime
               version: 0.8.3
+            - name: NTPClient
+              version: 3.2.1
             - name: LinkedList
               version: 1.3.3
             - name: WiFiManager
