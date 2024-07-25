@@ -5,7 +5,6 @@
 ## Notable Forks
 As I'm not actively maintaining and developing the code further, here are some forks:
 - https://github.com/JonnyBooker/split-flap
-- https://github.com/codingcatgirl/split-flap-fae-pcb (improved PCB, drop-in replacement)
   
 ## General
 The display's electronics use one esp01 as the master and up to 16 arduinos as slaves. The esp handles the webinterface and communicates to the units via I2C. Each unit is resposible for setting the zero position of the drum on startup and displaying any letter the master send its way.
